@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Тайный покупатель • Доступ по коду ДЦ (полная база)</title>
+    <title>Тайный покупатель • Доступ по коду ДЦ</title>
     <style>
         * {
             margin: 0;
@@ -78,13 +78,15 @@
             margin-bottom: 10px;
         }
 
-        .search-wrapper {
-            position: relative;
-            width: 100%;
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
         }
 
         .code-input {
-            width: 100%;
+            flex: 1;
             padding: 14px 18px;
             font-size: 1rem;
             font-weight: 500;
@@ -93,12 +95,32 @@
             border-radius: 48px;
             font-family: 'SF Mono', 'Fira Code', monospace;
             transition: all 0.2s;
+            letter-spacing: 0.5px;
         }
 
         .code-input:focus {
             outline: none;
             border-color: #2c7a6e;
             box-shadow: 0 0 0 3px rgba(44, 122, 110, 0.2);
+        }
+
+        .show-btn {
+            background: #2c7a6e;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 48px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .show-btn:hover {
+            background: #1e5f54;
+            transform: scale(0.98);
         }
 
         .hint-text {
@@ -114,6 +136,12 @@
             border: 1px solid #e0ede8;
             overflow: hidden;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .dc-header {
@@ -222,6 +250,16 @@
             font-weight: 500;
         }
 
+        .error-box {
+            background: #fff5f0;
+            border-radius: 2rem;
+            padding: 2rem;
+            text-align: center;
+            color: #c25a2c;
+            border: 1px solid #ffddd0;
+            font-weight: 500;
+        }
+
         .footer-note {
             margin-top: 24px;
             font-size: 0.7rem;
@@ -238,6 +276,14 @@
             .cred-value {
                 font-size: 1rem;
             }
+            .input-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .show-btn {
+                justify-content: center;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -248,24 +294,23 @@
             🕵️ Тайный покупатель
             <span>доступ по коду ДЦ</span>
         </h1>
-        <p>Введите код дилерского центра (например, EURUS06200) — отобразятся логин и пароль для входа на портал</p>
+        <p>Введите ваш код дилерского центра — нажмите «Показать доступ», чтобы получить логин и пароль для портала</p>
     </div>
 
     <div class="access-body">
         <div class="search-area">
             <label>🔑 Код дилерского центра (ДЦ)</label>
-            <div class="search-wrapper">
+            <div class="input-group">
                 <input type="text" id="dcCodeInput" class="code-input" 
-                       placeholder="Начните вводить код: EURUS, 06200..." 
-                       list="dcCodesList" autocomplete="off">
-                <datalist id="dcCodesList"></datalist>
-                <div class="hint-text">💡 Подсказка: можно вводить часть кода — выберите нужный из выпадающих подсказок</div>
+                       placeholder="Например: EURUS01100" autocomplete="off" spellcheck="false">
+                <button id="showAccessBtn" class="show-btn">🔓 Показать доступ</button>
             </div>
+            <div class="hint-text">💡 Введите точный код ДЦ (без пробелов) и нажмите кнопку</div>
         </div>
 
         <div id="dynamicAccessPanel">
             <div class="placeholder-box" id="placeholderMsg">
-                🔐 Введите или выберите код ДЦ из подсказок, чтобы получить учётные данные для портала «Тайный покупатель»
+                🔐 Введите код ДЦ и нажмите «Показать доступ», чтобы получить учётные данные для портала «Тайный покупатель»
             </div>
             <div id="credentialCard" style="display: none;"></div>
         </div>
@@ -497,19 +542,9 @@
 
     // DOM элементы
     const inputElement = document.getElementById('dcCodeInput');
-    const datalistElement = document.getElementById('dcCodesList');
+    const showBtn = document.getElementById('showAccessBtn');
     const placeholderDiv = document.getElementById('placeholderMsg');
     const cardContainer = document.getElementById('credentialCard');
-
-    // Заполняем datalist всеми кодами (для подсказок)
-    const allCodes = Object.keys(dcAccessData).sort();
-    allCodes.forEach(code => {
-        const option = document.createElement('option');
-        option.value = code;
-        const center = dcAccessData[code];
-        option.textContent = `${code} — ${center.name.substring(0, 70)}`;
-        datalistElement.appendChild(option);
-    });
 
     // Функция копирования
     function copyToClipboard(text, btnElement) {
@@ -555,16 +590,25 @@
         `;
     }
 
-    // Обновление информации по введённому коду
-    function updateByCode(rawCode) {
-        let trimmedCode = rawCode ? rawCode.trim() : '';
-        if (trimmedCode && dcAccessData[trimmedCode]) {
-            const data = dcAccessData[trimmedCode];
-            const cardHtml = renderAccessCard(trimmedCode, data);
+    // Показать доступ по введённому коду
+    function showAccess() {
+        const enteredCode = inputElement.value.trim();
+        
+        if (!enteredCode) {
+            cardContainer.style.display = 'none';
+            placeholderDiv.style.display = 'flex';
+            placeholderDiv.innerHTML = '⚠️ Введите код дилерского центра.';
+            return;
+        }
+        
+        if (dcAccessData[enteredCode]) {
+            const data = dcAccessData[enteredCode];
+            const cardHtml = renderAccessCard(enteredCode, data);
             cardContainer.innerHTML = cardHtml;
             cardContainer.style.display = 'block';
             placeholderDiv.style.display = 'none';
             
+            // Привязываем обработчики копирования
             document.querySelectorAll('.copy-btn').forEach(btn => {
                 const copyValue = btn.getAttribute('data-copy');
                 if (copyValue) {
@@ -577,43 +621,23 @@
         } else {
             cardContainer.style.display = 'none';
             placeholderDiv.style.display = 'flex';
-            if (trimmedCode && !dcAccessData[trimmedCode]) {
-                placeholderDiv.innerHTML = `❌ Код "${trimmedCode}" не найден в справочнике. <br> Проверьте ввод или выберите код из подсказок.`;
-            } else {
-                placeholderDiv.innerHTML = `🔐 Введите или выберите код ДЦ из подсказок, чтобы получить учётные данные для портала «Тайный покупатель»`;
-            }
+            placeholderDiv.innerHTML = `❌ Код "${enteredCode}" не найден в справочнике.<br>Проверьте правильность ввода или обратитесь к администратору.`;
         }
     }
 
-    // Обработчики событий
-    inputElement.addEventListener('input', (e) => {
-        const value = e.target.value;
-        if (dcAccessData[value]) {
-            updateByCode(value);
-        } else if (value === '') {
-            updateByCode('');
-        } else {
-            cardContainer.style.display = 'none';
-            placeholderDiv.style.display = 'flex';
-            placeholderDiv.innerHTML = `🔎 Нет точного совпадения с кодом "${value}". Введите код из списка подсказок.`;
+    // Обработчик кнопки
+    showBtn.addEventListener('click', showAccess);
+    
+    // Нажатие Enter в поле ввода
+    inputElement.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            showAccess();
         }
     });
 
-    inputElement.addEventListener('blur', () => {
-        const val = inputElement.value.trim();
-        if (val && dcAccessData[val]) {
-            updateByCode(val);
-        } else if (val && !dcAccessData[val]) {
-            cardContainer.style.display = 'none';
-            placeholderDiv.style.display = 'flex';
-            placeholderDiv.innerHTML = `❌ Код "${val}" не найден. Используйте точный код из справочника (например, EURUS06200).`;
-        } else {
-            updateByCode('');
-        }
-    });
-
-    // Инициализация
-    updateByCode('');
+    // Инициализация: показываем плейсхолдер
+    placeholderDiv.innerHTML = '🔐 Введите код ДЦ и нажмите «Показать доступ», чтобы получить учётные данные для портала «Тайный покупатель»';
 </script>
 </body>
 </html>
