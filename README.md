@@ -1,9 +1,8 @@
-<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Тайный покупатель • Доступ по коду ДЦ</title>
+    <title>Тайный покупатель • Доступ по коду и городу ДЦ</title>
     <style>
         * {
             margin: 0;
@@ -95,7 +94,7 @@
             border-radius: 48px;
             font-family: 'SF Mono', 'Fira Code', monospace;
             transition: all 0.2s;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
         }
 
         .code-input:focus {
@@ -128,6 +127,24 @@
             color: #6f9b8e;
             margin-top: 8px;
             margin-left: 12px;
+            background: #f0f6f4;
+            padding: 6px 12px;
+            border-radius: 40px;
+            display: inline-block;
+        }
+
+        .example-block {
+            background: #f4faf8;
+            border-radius: 1rem;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: #2c6b5c;
+            border-left: 4px solid #2c7a6e;
+        }
+
+        .example-block strong {
+            color: #1a5c4e;
         }
 
         .access-card {
@@ -292,30 +309,37 @@
     <div class="mystery-header">
         <h1>
             🕵️ Тайный покупатель
-            <span>доступ по коду ДЦ</span>
+            <span>доступ по коду + город</span>
         </h1>
-        <p>Введите ваш код дилерского центра — нажмите «Показать доступ», чтобы получить логин и пароль для портала</p>
+        <p>Для получения доступа необходимо указать код дилерского центра и город через разделитель</p>
     </div>
 
     <div class="access-body">
         <div class="search-area">
-            <label>🔑 Код дилерского центра (ДЦ)</label>
+            <label>🔑 Код ДЦ и город</label>
             <div class="input-group">
                 <input type="text" id="dcCodeInput" class="code-input" 
-                       placeholder="Например: EURUS01100" autocomplete="off" spellcheck="false">
+                       placeholder="EURUS06200 | Волгоград" 
+                       autocomplete="off" spellcheck="false">
                 <button id="showAccessBtn" class="show-btn">🔓 Показать доступ</button>
             </div>
-            <div class="hint-text">💡 Введите точный код ДЦ (без пробелов) и нажмите кнопку</div>
+            <div class="example-block">
+                <strong>📌 Примеры правильного ввода:</strong><br>
+                • <code>EURUS06200 | Воронеж</code><br>
+            </div>
+            <div class="hint-text">
+                💡 Формат: <strong>КОД_ДЦ | ГОРОД</strong> (вертикальная черта с пробелами). Город указывайте точно как в справочнике.
+            </div>
         </div>
 
         <div id="dynamicAccessPanel">
             <div class="placeholder-box" id="placeholderMsg">
-                🔐 Введите код ДЦ и нажмите «Показать доступ», чтобы получить учётные данные для портала «Тайный покупатель»
+                🔐 Введите код ДЦ и город в формате «КОД | ГОРОД» и нажмите «Показать доступ»
             </div>
             <div id="credentialCard" style="display: none;"></div>
         </div>
         <div class="footer-note">
-            ⚡ Полная база: все коды ДЦ из официальной выгрузки (логины и пароли для сервисного доступа)
+            ⚡ Полная база: все коды ДЦ из официальной выгрузки. Доступ возможен только при совпадении кода И города.
         </div>
     </div>
 </div>
@@ -590,39 +614,73 @@
         `;
     }
 
-    // Показать доступ по введённому коду
+    // Показать доступ по введённым коду и городу
     function showAccess() {
-        const enteredCode = inputElement.value.trim();
+        const inputValue = inputElement.value.trim();
         
-        if (!enteredCode) {
+        if (!inputValue) {
             cardContainer.style.display = 'none';
             placeholderDiv.style.display = 'flex';
-            placeholderDiv.innerHTML = '⚠️ Введите код дилерского центра.';
+            placeholderDiv.innerHTML = '⚠️ Введите код ДЦ и город в формате «КОД | ГОРОД»';
             return;
         }
         
-        if (dcAccessData[enteredCode]) {
-            const data = dcAccessData[enteredCode];
-            const cardHtml = renderAccessCard(enteredCode, data);
-            cardContainer.innerHTML = cardHtml;
-            cardContainer.style.display = 'block';
-            placeholderDiv.style.display = 'none';
-            
-            // Привязываем обработчики копирования
-            document.querySelectorAll('.copy-btn').forEach(btn => {
-                const copyValue = btn.getAttribute('data-copy');
-                if (copyValue) {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        copyToClipboard(copyValue, btn);
-                    });
-                }
-            });
-        } else {
+        // Разбираем строку: ожидаем формат "КОД | ГОРОД"
+        const separatorIndex = inputValue.indexOf('|');
+        if (separatorIndex === -1) {
             cardContainer.style.display = 'none';
             placeholderDiv.style.display = 'flex';
-            placeholderDiv.innerHTML = `❌ Код "${enteredCode}" не найден в справочнике.<br>Проверьте правильность ввода или обратитесь к администратору.`;
+            placeholderDiv.innerHTML = '❌ Неверный формат. Используйте разделитель | <br> Например: EURUS06200 | Воронеж';
+            return;
         }
+        
+        const code = inputValue.substring(0, separatorIndex).trim();
+        const city = inputValue.substring(separatorIndex + 1).trim();
+        
+        if (!code || !city) {
+            cardContainer.style.display = 'none';
+            placeholderDiv.style.display = 'flex';
+            placeholderDiv.innerHTML = '❌ И код, и город должны быть заполнены. Пример: EURUS06200 | Воронеж';
+            return;
+        }
+        
+        // Проверяем существование кода
+        if (!dcAccessData[code]) {
+            cardContainer.style.display = 'none';
+            placeholderDiv.style.display = 'flex';
+            placeholderDiv.innerHTML = `❌ Код "${code}" не найден в справочнике.<br>Проверьте правильность кода.`;
+            return;
+        }
+        
+        const data = dcAccessData[code];
+        
+        // Сравниваем город (без учёта регистра, пробелов в начале/конце)
+        const normalizedInputCity = city.toLowerCase().trim();
+        const normalizedDataCity = data.city.toLowerCase().trim();
+        
+        if (normalizedInputCity !== normalizedDataCity) {
+            cardContainer.style.display = 'none';
+            placeholderDiv.style.display = 'flex';
+            placeholderDiv.innerHTML = `❌ Город "${city}" не соответствует центру с кодом ${code}.<br>Для ${code} указан город: ${data.city}.<br>Пожалуйста, введите данные правильно.`;
+            return;
+        }
+        
+        // Всё верно — показываем доступ
+        const cardHtml = renderAccessCard(code, data);
+        cardContainer.innerHTML = cardHtml;
+        cardContainer.style.display = 'block';
+        placeholderDiv.style.display = 'none';
+        
+        // Привязываем обработчики копирования
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            const copyValue = btn.getAttribute('data-copy');
+            if (copyValue) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    copyToClipboard(copyValue, btn);
+                });
+            }
+        });
     }
 
     // Обработчик кнопки
@@ -635,9 +693,6 @@
             showAccess();
         }
     });
-
-    // Инициализация: показываем плейсхолдер
-    placeholderDiv.innerHTML = '🔐 Введите код ДЦ и нажмите «Показать доступ», чтобы получить учётные данные для портала «Тайный покупатель»';
 </script>
 </body>
 </html>
