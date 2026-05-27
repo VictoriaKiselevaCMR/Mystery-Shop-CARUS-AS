@@ -661,7 +661,7 @@
         if (normalizedInputCity !== normalizedDataCity) {
             cardContainer.style.display = 'none';
             placeholderDiv.style.display = 'flex';
-            placeholderDiv.innerHTML = `❌ Город "${city}" не соответствует центру с кодом ${code}.<br>Для ${code} указан город: ${data.city}.<br>Пожалуйста, введите данные правильно.`;
+            placeholderDiv.innerHTML = `❌ Город "${city}" не соответствует центру с кодом ${code}.<br>Пожалуйста, введите данные правильно.`;
             return;
         }
         
