@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -655,7 +654,7 @@
         if (!cityMatch) {
             placeholderMsg.style.display = 'block';
             credentialCard.style.display = 'none';
-            placeholderMsg.innerHTML = `❌ Город <strong>${searchCity}</strong> не найден для кода ${searchCode}.
+            placeholderMsg.innerHTML = `❌ Город <strong>${searchCity}</strong> не найден для кода ${searchCode}.<br>
             return;
         }
 
