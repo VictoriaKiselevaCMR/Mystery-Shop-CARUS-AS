@@ -1,8 +1,12 @@
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Тайный покупатель • Доступ по коду и городу ДЦ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доступы на портал</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -95,6 +99,7 @@
             font-family: 'SF Mono', 'Fira Code', monospace;
             transition: all 0.2s;
             letter-spacing: 0.3px;
+            min-width: 200px;
         }
 
         .code-input:focus {
@@ -147,6 +152,14 @@
             color: #1a5c4e;
         }
 
+        .example-block code {
+            background: #e0eee7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'SF Mono', monospace;
+            font-size: 0.8rem;
+        }
+
         .access-card {
             background: #fefef7;
             border-radius: 1.8rem;
@@ -154,6 +167,7 @@
             overflow: hidden;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
             animation: fadeIn 0.25s ease;
+            margin-bottom: 20px;
         }
 
         @keyframes fadeIn {
@@ -286,7 +300,32 @@
             padding-top: 20px;
         }
 
+        .dual-access {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .access-entry {
+            border-bottom: 1px solid #e8f0ec;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+        }
+
+        .access-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .access-entry .credential-block {
+            border-color: #e0ede8;
+        }
+
         @media (max-width: 640px) {
+            .dual-access {
+                grid-template-columns: 1fr;
+            }
             .access-body {
                 padding: 1.5rem;
             }
@@ -305,13 +344,14 @@
     </style>
 </head>
 <body>
+
 <div class="portal-container">
     <div class="mystery-header">
         <h1>
-            🕵️ Тайный покупатель
-            <span>доступ по коду + город</span>
+            🔐 Доступы на портал
+            <span>CS / UNI</span>
         </h1>
-        <p>Для получения доступа необходимо указать код дилерского центра и город через разделитель</p>
+        <p>Поиск по коду дилерского центра и городу</p>
     </div>
 
     <div class="access-body">
@@ -319,7 +359,7 @@
             <label>🔑 Код ДЦ и город</label>
             <div class="input-group">
                 <input type="text" id="dcCodeInput" class="code-input" 
-                       placeholder="EURUS06200 | Волгоград" 
+                       placeholder="EURUS06200 | Воронеж" 
                        autocomplete="off" spellcheck="false">
                 <button id="showAccessBtn" class="show-btn">🔓 Показать доступ</button>
             </div>
@@ -345,354 +385,414 @@
 </div>
 
 <script>
-    // ============================================================
-    // ПОЛНЫЙ СПРАВОЧНИК КОДОВ ДЦ ИЗ ФАЙЛА (все строки)
-    // ============================================================
-    const dcAccessData = {
-        "EURUS06199": { login: "wsve", password: "wsve65", holding: "Фреш", name: "Чанган Центр FRESH Волгоград", region: "ЮФО", city: "Волгоград" },
-        "EURUS06200": { login: "fdhu", password: "fdhu1", holding: "Фреш", name: "Чанган Центр FRESH Воронеж", region: "ЦФО", city: "Воронеж" },
-        "EURUS06213": { login: "dgsx", password: "dgsx34", holding: "Major", name: "Чанган Центр Олимп", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06214": { login: "iter", password: "iter34", holding: "Major", name: "Чанган Центр Мэйджор Светлановский (CS)", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06214_UNI": { login: "gfdy", password: "gfdy43", holding: "Major", name: "Юни Центр Мэйджор Светлановский (UNI)", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06215": { login: "brde", password: "brde32", holding: "Major", name: "Чанган Центр Мэйджор", region: "ЦФО", city: "Москва" },
-        "EURUS06232": { login: "irws", password: "irws18", holding: "Major", name: "Чанган Центр Мэйджор Сити", region: "ЦФО", city: "Москва" },
-        "EURUS06237": { login: "lbdh", password: "lbdh33", holding: "Major", name: "Чанган Центр Мэйджор Запад", region: "ЦФО", city: "Москва" },
-        "EURUS06238": { login: "glcx", password: "glcx99", holding: "Major", name: "Чанган Центр Мэйджор Юг", region: "ЦФО", city: "Москва" },
-        "EURUS06239": { login: "xztr", password: "xztr18", holding: "Major", name: "Чанган Центр Мэйджор Тушино", region: "ЦФО", city: "Москва" },
-        "EURUS06250": { login: "riop", password: "riop41", holding: "Major", name: "Юни Центр Мэйджор Север", region: "ЦФО", city: "Москва" },
-        "EURUS06297": { login: "vblo", password: "vblo54", holding: "Major", name: "Чанган Центр Мэйджор Строгино", region: "ЦФО", city: "Москва" },
-        "EURUS06293": { login: "xsxd", password: "xsxd37", holding: "ТТС", name: "Чанган Центр ТрансТехСервис", region: "ПФО", city: "Набережные Челны" },
-        "EURUS06318": { login: "oier", password: "oier49", holding: "ТТС", name: "Чанган Центр ТрансТехСервис Уфа", region: "ПФО", city: "Уфа" },
-        "EURUS06330": { login: "ghye", password: "ghye70", holding: "ТТС", name: "Чанган Центр ТрансТехСервис Казань Декабристов", region: "ПФО", city: "Казань" },
-        "EURUS06363": { login: "pyws", password: "pyws63", holding: "ТТС", name: "Чанган Центр ТрансТехСервис Ижевск", region: "ПФО", city: "Ижевск" },
-        "EURUS06376": { login: "pilx", password: "pilx32", holding: "ТТС", name: "Чанган Центр ТрансТехСервис Нижнекамск", region: "ПФО", city: "Нижнекамск" },
-        "EURUS06384": { login: "slvw", password: "slvw90", holding: "ТТС", name: "Чанган Центр ТрансТехСервис Мамадышский", region: "ПФО", city: "Казань" },
-        "EURUS06216": { login: "zazt", password: "zazt54", holding: "Автомир", name: "Чанган Центр Автомир на Щелковском", region: "ЦФО", city: "Москва" },
-        "EURUS06217": { login: "vbds", password: "vbds37", holding: "Автомир", name: "Чанган Центр Автомир на Дмитровском", region: "ЦФО", city: "Москва" },
-        "EURUS06309": { login: "tvcv", password: "tvcv39", holding: "Автомир", name: "Чанган Центр Автомир на Дунайском", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06340": { login: "spre", password: "spre11", holding: "Автомир", name: "Чанган Центр Автомир", region: "ЦФО", city: "Брянск" },
-        "EURUS06341": { login: "dpiq", password: "dpiq09", holding: "Автомир", name: "Чанган Центр Автомир на Петухова", region: "СФО", city: "Новосибирск" },
-        "EURUS06369": { login: "frwa", password: "frwa36", holding: "Автомир", name: "Чанган Центр Автомир Люблино", region: "ЦФО", city: "Москва" },
-        "EURUS06267": { login: "drtq", password: "drtq33", holding: "Атлант Моторс", name: "Чанган Центр Дельта Моторс", region: "ЮФО", city: "Ростов-на-Дону" },
-        "EURUS06268": { login: "qasd", password: "qasd58", holding: "Атлант Моторс", name: "Чанган Центр Сокол Моторс Таганрог", region: "ЮФО", city: "Таганрог" },
-        "EURUS06269": { login: "cmnb", password: "cmnb05", holding: "Атлант Моторс", name: "Чанган Центр Сокол Моторс Шолохова", region: "ЮФО", city: "Ростов-на-Дону" },
-        "EURUS06300": { login: "uohg", password: "uohg66", holding: "Атлант Моторс", name: "Чанган Центр Сокол Моторс Шахты", region: "ЮФО", city: "Шахты" },
-        "EURUS06301": { login: "jknc", password: "jknc12", holding: "Атлант Моторс", name: "Чанган Центр Сокол Моторс Волгодонск", region: "ЮФО", city: "Волгодонск" },
-        "EURUS06223": { login: "sgfr", password: "sgfr48", holding: "САНРАЙЗ ГРУПП", name: "Юни Центр Санрайз Групп", region: "ЦФО", city: "Москва" },
-        "EURUS06359": { login: "dfpa", password: "dfpa17", holding: "САНРАЙЗ ГРУПП", name: "Юни Центр Санрайз Групп", region: "СЗФО", city: "Мурманск" },
-        "EURUS06345": { login: "zxuy", password: "zxuy22", holding: "САНРАЙЗ ГРУПП", name: "Чанган Центр Вологда", region: "СЗФО", city: "Вологда" },
-        "EURUS06221": { login: "clue", password: "clue43", holding: "Авторитэйл", name: "Чанган Центр Вагнер", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06316": { login: "srqp", password: "srqp97", holding: "Авторитэйл", name: "Чанган Центр Вагнер Выборгский", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06351": { login: "erty", password: "erty05", holding: "Автомобильный дом", name: "Чанган Центр Окружная", region: "СЗФО", city: "Калининград" },
-        "EURUS06224": { login: "lbvd", password: "lbvd71", holding: "ОПТИМА КУБАНЬ", name: "Чанган Центр Оптима Краснодар", region: "ЮФО", city: "Краснодар" },
-        "EURUS06228": { login: "sdrq", password: "sdrq21", holding: "ОПТИМА КУБАНЬ", name: "Чанган Центр Оптима Сочи", region: "ЮФО", city: "Сочи" },
-        "EURUS06252": { login: "gfda", password: "gfda78", holding: "АсАвто", name: "Чанган Центр ГК АсАвто Тольятти", region: "ПФО", city: "Тольятти" },
-        "EURUS06338": { login: "zxcm", password: "zxcm33", holding: "", name: "Чанган Центр Автобан", region: "УФО", city: "Екатеринбург" },
-        "EURUS06289": { login: "swql", password: "swql55", holding: "Автокласс", name: "Чанган Центр Новомосковск", region: "ЦФО", city: "Новомосковск" },
-        "EURUS06328": { login: "dfpo", password: "dfpo11", holding: "АГАТ", name: "Чанган Центр Агат на Комсомольском", region: "ПФО", city: "Нижний Новгород" },
-        "EURUS06282": { login: "sdpo", password: "sdpo33", holding: "АвтоЮг", name: "Чанган Центр АвтоЮг", region: "ЮФО", city: "Ставрополь" },
-        "EURUS06355": { login: "wnbs", password: "wnbs67", holding: "Юг-Авто", name: "Чанган Центр Юг-Авто", region: "ЮФО", city: "Краснодар" },
-        "EURUS06263": { login: "dfpp", password: "dfpp55", holding: "", name: "Чанган Центр АвтоГЕРМЕС", region: "ЦФО", city: "Москва" },
-        "EURUS06292": { login: "xlmn", password: "xlmn77", holding: "", name: "Чанган Центр Чебоксары", region: "ПФО", city: "Чебоксары" },
-        "EURUS06285": { login: "dfcx", password: "dfcx65", holding: "Автоимпорт", name: "Чанган Центр Автоимпорт", region: "ЦФО", city: "Тула" },
-        "EURUS06286": { login: "fpqm", password: "fpqm01", holding: "Автоимпорт", name: "Чанган Центр Автоимпорт Юг", region: "ЦФО", city: "Рязань" },
-        "EURUS06326": { login: "linw", password: "linw88", holding: "БЦР", name: "Чанган Центр на Гагарина", region: "ПФО", city: "Нижний Новгород" },
-        "EURUS06191": { login: "nbxc", password: "nbxc32", holding: "Автокласс", name: "Чанган Центр Автокласс", region: "ЦФО", city: "Тула" },
-        "EURUS06236": { login: "vfys", password: "vfys91", holding: "", name: "Чанган Центр ААА Моторс", region: "ЮФО", city: "Ростов-на-Дону" },
-        "EURUS06305": { login: "pjvc", password: "pjvc33", holding: "", name: "Чанган Центр Максимум", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06281": { login: "ghlk", password: "ghlk54", holding: "БЦР", name: "Чанган Центр БЦР Моторс", region: "ПФО", city: "Нижний Новгород" },
-        "EURUS06279": { login: "demj", password: "demj97", holding: "", name: "Чанган Центр Арена Авто", region: "ПФО", city: "Тольятти" },
-        "EURUS06145": { login: "pmnf", password: "pmnf11", holding: "", name: "Чанган Центр Автолига", region: "ПФО", city: "Нижний Новгород" },
-        "EURUS06173": { login: "gfmn", password: "gfmn80", holding: "", name: "Чанган Центр Софийская", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06211": { login: "sopz", password: "sopz60", holding: "АГАТ", name: "Чанган Центр Агат", region: "ЮФО", city: "Волгоград" },
-        "EURUS06242_CS": { login: "xpre", password: "xpre07", holding: "АСПЭК", name: "Чанган Центр АСПЭК-Авто (CS)", region: "ПФО", city: "Ижевск" },
-        "EURUS06242_UNI": { login: "phbd", password: "phbd84", holding: "АСПЭК", name: "Юни Центр АСПЭК-Авто (UNI)", region: "ПФО", city: "Ижевск" },
-        "EURUS06280": { login: "gfdb", password: "gfdb08", holding: "Темп авто", name: "Чанган Центр Темп Авто Ростов-на-Дону", region: "ЮФО", city: "Ростов-на-Дону" },
-        "EURUS06069": { login: "hgvv", password: "hgvv40", holding: "Базис Моторс", name: "Чанган Центр Базис Пермякова", region: "УФО", city: "Тюмень" },
-        "EURUS06306": { login: "dfoe", password: "dfoe72", holding: "Ринг Авто", name: "Чанган Центр Ринг Воронеж", region: "ЦФО", city: "Воронеж" },
-        "EURUS06403": { login: "bbtt", password: "bbtt95", holding: "Ринг Авто", name: "Чанган Центр Ринг Авто", region: "ЦФО", city: "Липецк" },
-        "EURUS06329": { login: "dcur", password: "dcur73", holding: "", name: "Чанган Центр Авторай", region: "ПФО", city: "Ульяновск" },
-        "EURUS06147": { login: "jgff", password: "jgff77", holding: "", name: "Чанган Центр Лидер", region: "ЦФО", city: "Рязань" },
-        "EURUS06288": { login: "grsl", password: "grsl45", holding: "АГАТ", name: "Чанган Центр АГАТ Аэропорт", region: "ЮФО", city: "Астрахань" },
-        "EURUS06347": { login: "ojvd", password: "ojvd05", holding: "", name: "Чанган Центр Автопортрет", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06251": { login: "xxoi", password: "xxoi43", holding: "АГАТ", name: "Чанган Центр Агат Ярославль", region: "ЦФО", city: "Ярославль" },
-        "EURUS06248": { login: "nbrf", password: "nbrf05", holding: "", name: "Чанган Центр Новокар", region: "ЮФО", city: "Новороссийск" },
-        "EURUS06229": { login: "sdec", password: "sdec47", holding: "АГАТ", name: "Чанган Центр Саранск", region: "ПФО", city: "Саранск" },
-        "EURUS06337": { login: "eglg", password: "eglg03", holding: "", name: "Чанган Центр Квазар", region: "ЦФО", city: "Москва" },
-        "EURUS06299": { login: "ooes", password: "ooes60", holding: "КАН АВТО", name: "Чанган Центр КАН АВТО", region: "ПФО", city: "Казань" },
-        "EURUS06149": { login: "zlmf", password: "zlmf73", holding: "", name: "Чанган Центр Автосити", region: "ЦФО", city: "Воронеж" },
-        "EURUS06325": { login: "sdoj", password: "sdoj66", holding: "", name: "Чанган Центр Уникум", region: "УФО", city: "Нижний Тагил" },
-        "EURUS06193": { login: "ggdd", password: "ggdd53", holding: "Автофорум", name: "Чанган Центр Автофорум Восток", region: "ПФО", city: "Саратов" },
-        "EURUS06187": { login: "jgrc", password: "jgrc76", holding: "Регинас", name: "Чанган Центр Регинас Магнитогорск", region: "УФО", city: "Магнитогорск" },
-        "EURUS06201": { login: "vvoo", password: "vvoo40", holding: "Регинас", name: "Чанган Центр Регинас на Кашириных (CS)", region: "УФО", city: "Челябинск" },
-        "EURUS06201_UNI": { login: "ihcv", password: "ihcv44", holding: "Регинас", name: "Юни Центр Регинас на Кашириных (UNI)", region: "УФО", city: "Челябинск" },
-        "EURUS06202": { login: "dhre", password: "dhre11", holding: "Регинас", name: "Чанган Центр Регинас на Гурзуфской", region: "УФО", city: "Екатеринбург" },
-        "EURUS06203": { login: "bbed", password: "bbed28", holding: "Регинас", name: "Чанган Центр Регинас Миасс", region: "УФО", city: "Миасс" },
-        "EURUS06245": { login: "bflo", password: "bflo19", holding: "Регинас", name: "Чанган Центр Регинас на Свердловском", region: "УФО", city: "Челябинск" },
-        "EURUS06254": { login: "uhdd", password: "uhdd55", holding: "Регинас", name: "Чанган Центр Регинас на Высоцкого", region: "УФО", city: "Екатеринбург" },
-        "EURUS06398": { login: "srec", password: "srec11", holding: "Регинас", name: "Чанган Центр Регинас на Ленина", region: "УФО", city: "Челябинск" },
-        "EURUS06304": { login: "zasz", password: "zasz13", holding: "Автофорум", name: "Чанган Центр АвтоФорум", region: "ПФО", city: "Саратов" },
-        "EURUS06246": { login: "bbge", password: "bbge21", holding: "Фастар", name: "Чанган Центр Фастар на Речном", region: "СФО", city: "Новосибирск" },
-        "EURUS06311": { login: "wwjb", password: "wwjb33", holding: "ДАВ АВТО", name: "Чанган Центр ДАВ-АВТО", region: "ПФО", city: "Пермь" },
-        "EURUS06150": { login: "rtdd", password: "rtdd77", holding: "", name: "Чанган Центр АЦ Кунцево", region: "ЦФО", city: "Москва" },
-        "EURUS06137": { login: "hhgw", password: "hhgw84", holding: "ЭКСПОКАР", name: "Чанган Центр Экспокар Краснодар", region: "ЮФО", city: "Краснодар" },
-        "EURUS06344": { login: "gedd", password: "gedd81", holding: "", name: "Чанган Центр Автоград", region: "УФО", city: "Тюмень" },
-        "EURUS06255": { login: "gcsx", password: "gcsx83", holding: "Фастар", name: "Чанган Центр Самара-Авто", region: "ПФО", city: "Самара" },
-        "EURUS06287": { login: "dduu", password: "dduu99", holding: "", name: "Чанган Центр Энгельс", region: "ПФО", city: "Энгельс" },
-        "EURUS06270": { login: "yfsd", password: "yfsd33", holding: "Темп Авто", name: "Чанган Центр Темп Авто", region: "ЮФО", city: "Краснодар" },
-        "EURUS06154": { login: "ddoo", password: "ddoo29", holding: "Тисс Авто", name: "Чанган Центр Барнаул (CS)", region: "СФО", city: "Барнаул" },
-        "EURUS06400": { login: "trnb", password: "trnb00", holding: "Тисс Авто", name: "Юни Центр Барнаул (UNI)", region: "СФО", city: "Барнаул" },
-        "EURUS06013": { login: "sdom", password: "sdom13", holding: "Диалог", name: "Чанган Центр Альметьевск", region: "ПФО", city: "Альметьевск" },
-        "EURUS06107": { login: "hgvs", password: "hgvs23", holding: "Диалог", name: "Чанган Центр Диалог Авто", region: "ПФО", city: "Казань" },
-        "EURUS06256": { login: "eiyt", password: "eiyt48", holding: "АсАвто", name: "Чанган Центр АсАвто Юг", region: "ПФО", city: "Самара" },
-        "EURUS06061": { login: "aaiu", password: "aaiu65", holding: "Демидыч", name: "Чанган Центр Демидыч Пермь", region: "ПФО", city: "Пермь" },
-        "EURUS06261": { login: "hecb", password: "hecb39", holding: "Демидыч", name: "Чанган Центр Демидыч Уфа (CS)", region: "ПФО", city: "Уфа" },
-        "EURUS06261_UNI": { login: "ssbr", password: "ssbr69", holding: "Демидыч", name: "Юни Центр Демидыч Уфа (UNI)", region: "ПФО", city: "Уфа" },
-        "EURUS06308": { login: "xesd", password: "xesd33", holding: "Прагматика", name: "Чанган Центр Прагматика Купчино", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06204": { login: "ernb", password: "ernb77", holding: "", name: "Чанган Центр Киров", region: "ПФО", city: "Киров" },
-        "EURUS06189": { login: "ggfj", password: "ggfj34", holding: "Авто Премиум", name: "Чанган Центр Тверь", region: "ЦФО", city: "Тверь" },
-        "EURUS06155": { login: "azsf", password: "azsf71", holding: "", name: "Чанган Центр АвтоГрад в Добром", region: "ЦФО", city: "Владимир" },
-        "EURUS06163": { login: "hymc", password: "hymc94", holding: "", name: "Чанган Центр Белгород", region: "ЦФО", city: "Белгород" },
-        "EURUS06183": { login: "dssl", password: "dssl34", holding: "", name: "Чанган Центр Минеральные Воды", region: "СКФО", city: "Минеральные Воды" },
-        "EURUS06151": { login: "vbbq", password: "vbbq17", holding: "Авилон", name: "Чанган Центр Авилон", region: "ЦФО", city: "Москва" },
-        "EURUS06243": { login: "etyi", password: "etyi11", holding: "Автопрестиж", name: "Чанган Центр Калуга", region: "ЦФО", city: "Калуга" },
-        "EURUS06253": { login: "hgff", password: "hgff46", holding: "", name: "Юни Центр Брянск", region: "ЦФО", city: "Брянск" },
-        "EURUS06283": { login: "dduy", password: "dduy06", holding: "Автосалон-2000", name: "Чанган Центр Автосалон-2000", region: "ПФО", city: "Оренбург" },
-        "EURUS06284": { login: "kvnq", password: "kvnq39", holding: "Автосалон-2000", name: "Чанган Центр Автосалон-2000", region: "ПФО", city: "Орск" },
-        "EURUS06312": { login: "mnrr", password: "mnrr32", holding: "Арконт", name: "Чанган Центр Арконт", region: "ЮФО", city: "Волжский" },
-        "EURUS06385": { login: "brjh", password: "brjh08", holding: "Арконт", name: "Чанган Центр Арконт", region: "ЮФО", city: "Краснодар" },
-        "EURUS06370": { login: "fdwl", password: "fdwl30", holding: "КОРС Групп", name: "Чанган Центр Курск", region: "ЦФО", city: "Курск" },
-        "EURUS06381": { login: "ceap", password: "ceap46", holding: "КОРС Групп", name: "Чанган Центр Корс", region: "ЦФО", city: "Коломна" },
-        "EURUS06395": { login: "btkk", password: "btkk17", holding: "КОРС Групп", name: "Чанган Центр Корс", region: "ЦФО", city: "Орел" },
-        "EURUS06366": { login: "rrkd", password: "rrkd53", holding: "", name: "Юни Центр Автолоцман", region: "ПФО", city: "Пенза" },
-        "EURUS06368": { login: "cotd", password: "cotd48", holding: "Аларм", name: "Чанган Центр Аларм Моторс", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06372": { login: "ggwi", password: "ggwi28", holding: "", name: "Чанган Центр АТК Моторс", region: "ПФО", city: "Самара" },
-        "EURUS06373": { login: "lgsr", password: "lgsr60", holding: "ОПТИМА КУБАНЬ", name: "Чанган Центр Оптима Тамань", region: "ЮФО", city: "Краснодар" },
-        "EURUS06374": { login: "jdlh", password: "jdlh62", holding: "АБЦГрупп", name: "Чанган Центр Рыбинск", region: "ЦФО", city: "Рыбинск" },
-        "EURUS06375": { login: "soyu", password: "soyu53", holding: "АГАТ", name: "Чанган Центр Агат на Промышленном", region: "ЦФО", city: "Владимир" },
-        "EURUS06377": { login: "khfd", password: "khfd32", holding: "Автопрестиж", name: "Чанган Центр Автопрестиж", region: "ПФО", city: "Пермь" },
-        "EURUS06386": { login: "rdjl", password: "rdjl91", holding: "РОЛЬФ", name: "Чанган Центр Рольф Ясенево", region: "ЦФО", city: "Москва" },
-        "EURUS06387": { login: "igrv", password: "igrv35", holding: "РОЛЬФ", name: "Чанган Центр Рольф Химки", region: "ЦФО", city: "Москва" },
-        "EURUS06389": { login: "ldhi", password: "ldhi05", holding: "БЦР", name: "Чанган Центр БЦР-ПЕЧЁРЫ", region: "ПФО", city: "Нижний Новгород" },
-        "EURUS06388": { login: "ofrn", password: "ofrn97", holding: "", name: "Чанган Центр Автопродикс", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06390": { login: "zpiu", password: "zpiu40", holding: "", name: "Чанган Центр АНТ", region: "СФО", city: "Барнаул" },
-        "EURUS06391": { login: "tffg", password: "tffg02", holding: "", name: "Чанган Центр Сатурн", region: "УФО", city: "Челябинск" },
-        "EURUS06392": { login: "dpuy", password: "dpuy55", holding: "", name: "Чанган Центр Фрагмент на Копейском", region: "УФО", city: "Челябинск" },
-        "EURUS06393": { login: "fdwe", password: "fdwe20", holding: "Сильвер-Авто ГРУПП", name: "Чанган Центр СИЛЬВЕР", region: "УФО", city: "Курган" },
-        "EURUS06397": { login: "hfue", password: "hfue85", holding: "Сильвер-Авто ГРУПП", name: "Чанган Центр СИЛЬВЕР", region: "УФО", city: "Магнитогорск" },
-        "EURUS06396": { login: "ihcy", password: "ihcy03", holding: "", name: "Чанган Центр Агат-Авто", region: "СФО", city: "Братск" },
-        "EURUS06361": { login: "serd", password: "serd23", holding: "", name: "Чанган Центр Фаравто", region: "СКФО", city: "Махачкала" },
-        "EURUS06356": { login: "ngbd", password: "ngbd79", holding: "", name: "Чанган Центр НИКА АВТО", region: "ПФО", city: "Оренбург" },
-        "EURUS06360": { login: "jdvg", password: "jdvg54", holding: "", name: "Чанган Центр Автомаркет", region: "СЗФО", city: "Мурманск" },
-        "EURUS06354": { login: "hdon", password: "hdon63", holding: "АВТОСТИЛЬ", name: "Чанган Центр Великий Новгород (CS)", region: "СЗФО", city: "Великий Новгород" },
-        "EURUS06404": { login: "artg", password: "artg51", holding: "АВТОСТИЛЬ", name: "Юни Центр Великий Новгород (UNI)", region: "СЗФО", city: "Великий Новгород" },
-        "EURUS06039": { login: "dlie", password: "dlie44", holding: "АВТОСТИЛЬ", name: "Чанган Центр Автостиль Автово", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06209": { login: "ziun", password: "ziun55", holding: "", name: "Чанган Центр Армада-Авто", region: "ПФО", city: "Ульяновск" },
-        "EURUS06265": { login: "qety", password: "qety80", holding: "Ринг Авто", name: "Чанган Центр Оскол", region: "ЦФО", city: "Старый Оскол" },
-        "EURUS06298": { login: "ljds", password: "ljds61", holding: "", name: "Чанган Центр Орехово-Зуево", region: "ЦФО", city: "Орехово-Зуево" },
-        "EURUS06135": { login: "okge", password: "okge61", holding: "", name: "Чанган Центр Калининград", region: "СЗФО", city: "Калининград" },
-        "EURUS06272": { login: "dytf", password: "dytf54", holding: "", name: "Чанган Центр Томск", region: "СФО", city: "Томск" },
-        "EURUS06093": { login: "kwrd", password: "kwrd36", holding: "", name: "Чанган Центр Серпухов", region: "ЦФО", city: "Серпухов" },
-        "EURUS06349": { login: "vzxo", password: "vzxo02", holding: "", name: "Юни Центр Хабаровск", region: "ДФО", city: "Хабаровск" },
-        "EURUS06350": { login: "dvne", password: "dvne06", holding: "МЕДВЕДЬ", name: "Чанган Центр Медведь", region: "СФО", city: "Абакан" },
-        "EURUS06307": { login: "jvjr", password: "jvjr27", holding: "", name: "Юни Центр Абакан", region: "СФО", city: "Абакан" },
-        "EURUS06240": { login: "gfod", password: "gfod82", holding: "Сибимпэкс", name: "Чанган Центр Кузбасс", region: "СФО", city: "Кемерово" },
-        "EURUS06197": { login: "mnus", password: "mnus88", holding: "", name: "Чанган Центр Нижневартовск", region: "УФО", city: "Нижневартовск" },
-        "EURUS06220": { login: "sohg", password: "sohg56", holding: "Автополе", name: "Чанган Центр Автополе", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06332": { login: "pgtd", password: "pgtd01", holding: "", name: "Юни Центр Улан-Удэ", region: "ДФО", city: "Улан-Удэ" },
-        "EURUS06185": { login: "sohy", password: "sohy77", holding: "", name: "Чанган Центр Восток", region: "УФО", city: "Екатеринбург" },
-        "EURUS06274": { login: "sdtw", password: "sdtw05", holding: "Великан", name: "Чанган Центр Измайлово", region: "ЦФО", city: "Москва" },
-        "EURUS06295": { login: "vbwe", password: "vbwe54", holding: "FAVORIT MOTORS", name: "Чанган Центр FAVORIT MOTORS МКАД", region: "ЦФО", city: "Реутов" },
-        "EURUS06294": { login: "xpgt", password: "xpgt84", holding: "", name: "Чанган Центр VERRA", region: "ПФО", city: "Пермь" },
-        "EURUS06235": { login: "dspw", password: "dspw95", holding: "АвтоЮг", name: "Чанган Центр Пятигорск", region: "СКФО", city: "Пятигорск" },
-        "EURUS06314": { login: "geni", password: "geni32", holding: "ВОСТОК МОТОРС", name: "Чанган Центр Новый Уренгой", region: "УФО", city: "Новый Уренгой" },
-        "EURUS06226": { login: "edki", password: "edki44", holding: "Великан", name: "Чанган Центр Липецк", region: "ЦФО", city: "Липецк" },
-        "EURUS06334": { login: "dont", password: "dont87", holding: "Лаки Моторс", name: "Чанган Центр Лаки Моторс", region: "УФО", city: "Екатеринбург" },
-        "EURUS06192": { login: "kdgy", password: "kdgy22", holding: "", name: "Чанган Центр Тамбов", region: "ЦФО", city: "Тамбов" },
-        "EURUS06035": { login: "xort", password: "xort64", holding: "", name: "Чанган Центр Радар Авто", region: "ЦФО", city: "Иваново" },
-        "EURUS06310": { login: "wlnu", password: "wlnu88", holding: "Базис Моторс", name: "Чанган Центр Базис Окружная", region: "УФО", city: "Тюмень" },
-        "EURUS06346": { login: "yerc", password: "yerc08", holding: "", name: "Юни Центр Вологда", region: "СЗФО", city: "Вологда" },
-        "EURUS06262": { login: "igfy", password: "igfy41", holding: "FAVORIT MOTORS", name: "Чанган Центр FAVORIT MOTORS Юг", region: "ЦФО", city: "Москва" },
-        "EURUS06233": { login: "jnye", password: "jnye55", holding: "Башавтоком", name: "Чанган Центр Башавтоком", region: "ПФО", city: "Уфа" },
-        "EURUS06234": { login: "nhdu", password: "nhdu48", holding: "Башавтоком", name: "Чанган Центр Башавтоком Юг (CS)", region: "ПФО", city: "Стерлитамак" },
-        "EURUS06234_UNI": { login: "htdf", password: "htdf94", holding: "Башавтоком", name: "Юни Центр Башавтоком Юг (UNI)", region: "ПФО", city: "Стерлитамак" },
-        "EURUS06302": { login: "xkut", password: "xkut59", holding: "Башавтоком", name: "Чанган Центр Башавтоком Север", region: "ПФО", city: "Октябрьский" },
-        "EURUS06327": { login: "dbhq", password: "dbhq50", holding: "КАН АВТО", name: "Чанган Центр КАН АВТО Сибирский", region: "ПФО", city: "Казань" },
-        "EURUS06212": { login: "djip", password: "djip83", holding: "", name: "Чанган Центр Внуково", region: "ЦФО", city: "Москва" },
-        "EURUS06335": { login: "vdht", password: "vdht66", holding: "Лаки Моторс", name: "Юни Центр Лаки Моторс", region: "УФО", city: "Екатеринбург" },
-        "EURUS06321": { login: "hrse", password: "hrse11", holding: "", name: "Чанган Центр Россо", region: "СФО", city: "Иркутск" },
-        "EURUS06247": { login: "rgws", password: "rgws49", holding: "FAVORIT MOTORS", name: "Чанган Центр FAVORIT MOTORS Север", region: "ЦФО", city: "Москва" },
-        "EURUS06017": { login: "kdye", password: "kdye31", holding: "", name: "Чанган Центр Восток-Авто", region: "ПФО", city: "Оренбург" },
-        "EURUS06207": { login: "jsst", password: "jsst96", holding: "", name: "Чанган Центр Премьер Авто", region: "ЦФО", city: "Смоленск" },
-        "EURUS06353": { login: "jwry", password: "jwry83", holding: "МЕДВЕДЬ", name: "Чанган Центр Медведь Север", region: "СФО", city: "Красноярск" },
-        "EURUS06348": { login: "kfds", password: "kfds77", holding: "Сура-Моторс", name: "Юни Центр Пенза", region: "ПФО", city: "Пенза" },
-        "EURUS06175": { login: "gsew", password: "gsew72", holding: "СК-Моторс", name: "Чанган Центр СК-Моторс", region: "УФО", city: "Сургут" },
-        "EURUS06315": { login: "jumi", password: "jumi83", holding: "", name: "Чанган Центр АвтоПремьер Зубово", region: "ПФО", city: "Уфа" },
-        "EURUS06266": { login: "jdie", password: "jdie88", holding: "АКСЕЛЬ", name: "Чанган Центр Архангельск", region: "СЗФО", city: "Архангельск" },
-        "EURUS06291": { login: "kejo", password: "kejo02", holding: "", name: "Чанган Центр Сыктывкар", region: "СЗФО", city: "Сыктывкар" },
-        "EURUS06333": { login: "pejk", password: "pejk42", holding: "", name: "Чанган Центр Улан-Удэ", region: "ДФО", city: "Улан-Удэ" },
-        "EURUS06290": { login: "kgrs", password: "kgrs89", holding: "", name: "Чанган Центр Кострома", region: "ЦФО", city: "Кострома" },
-        "EURUS06219": { login: "khuc", password: "khuc15", holding: "Авторусь", name: "Чанган Центр Авторусь Подольск", region: "ЦФО", city: "Москва" },
-        "EURUS06165": { login: "endu", password: "endu10", holding: "Сибимпэкс", name: "Чанган Центр Новокузнецк", region: "СФО", city: "Новокузнецк" },
-        "EURUS06322": { login: "hehb", password: "hehb88", holding: "", name: "Чанган Центр Иркут на Трактовой", region: "СФО", city: "Иркутск" },
-        "EURUS06171": { login: "jeon", password: "jeon38", holding: "", name: "Чанган Центр Йошкар-Ола", region: "ПФО", city: "Йошкар-Ола" },
-        "EURUS06320": { login: "jdin", password: "jdin72", holding: "", name: "Чанган Центр Атик-Моторс", region: "ДФО", city: "Благовещенск" },
-        "EURUS06343": { login: "jeje", password: "jeje83", holding: "", name: "Чанган Центр Альянс Моторс", region: "УФО", city: "Сургут" },
-        "EURUS06257": { login: "fojd", password: "fojd27", holding: "", name: "Юни Центр Курган", region: "УФО", city: "Курган" },
-        "EURUS06230": { login: "jdke", password: "jdke29", holding: "", name: "Юни Центр Зеленоград", region: "ЦФО", city: "Москва" },
-        "EURUS06271": { login: "oidj", password: "oidj13", holding: "", name: "Чанган Центр Атлант-М", region: "ЦФО", city: "Москва" },
-        "EURUS06331": { login: "hbdu", password: "hbdu02", holding: "Авторитэйл", name: "Чанган Центр Варшавка", region: "ЦФО", city: "Москва" },
-        "EURUS06180": { login: "hebi", password: "hebi92", holding: "", name: "Чанган Центр КМ/Ч-Север", region: "ЦФО", city: "Москва" },
-        "EURUS06259": { login: "jenr", password: "jenr74", holding: "СК-Моторс", name: "Чанган Центр Ноябрьск", region: "УФО", city: "Ноябрьск" },
-        "EURUS06205": { login: "оеау", password: "оеау01", holding: "", name: "Чанган Центр Череповец", region: "СЗФО", city: "Череповец" },
-        "EURUS06241": { login: "hdif", password: "hdif83", holding: "Сура-Моторс", name: "Чанган Центр Пенза", region: "ПФО", city: "Пенза" },
-        "EURUS06296": { login: "heee", password: "heee93", holding: "", name: "Юни Центр Псков", region: "СЗФО", city: "Псков" },
-        "EURUS06339": { login: "ybod", password: "ybod95", holding: "", name: "Юни Центр Глазурит", region: "УФО", city: "Екатеринбург" },
-        "EURUS06336": { login: "feel", password: "efel63", holding: "", name: "Чанган Центр АСМОТО", region: "УФО", city: "Екатеринбург" },
-        "EURUS06319": { login: "jdhh", password: "jdhh34", holding: "", name: "Чанган Центр Сумотори-Авто", region: "ДФО", city: "Артем" },
-        "EURUS06317": { login: "bdnf", password: "bdnf44", holding: "", name: "Юни Центр Автоплюс", region: "УФО", city: "Нижний Тагил" },
-        "EURUS06352": { login: "hrew", password: "hrew82", holding: "Автодом", name: "Чанган Центр Алтуфьево", region: "ЦФО", city: "Москва" },
-        "EURUS06260": { login: "jseg", password: "jseg04", holding: "СК-Моторс", name: "Чанган Центр Нягань", region: "УФО", city: "Нягань" },
-        "EURUS06367": { login: "kdcb", password: "kdcb55", holding: "Авто Премиум", name: "Чанган Центр Авто Премиум", region: "СЗФО", city: "Санкт-Петербург" },
-        "EURUS06371": { login: "fjif", password: "fjif13", holding: "МЕДВЕДЬ", name: "Чанган Центр на Копылова", region: "СФО", city: "Красноярск" },
-        "EURUS06379": { login: "infh", password: "infh68", holding: "", name: "Чанган Центр Феникс-Авто", region: "СФО", city: "Омск" },
-        "EURUS06380": { login: "fnhl", password: "fnhl97", holding: "", name: "Чанган Центр БАКРА 2.0", region: "ЮФО", city: "Краснодар" },
-        "EURUS06382": { login: "jdve", password: "jdve00", holding: "Фастар", name: "Чанган Центр Фастар на Станционной", region: "СФО", city: "Новосибирск" },
-        "EURUS06383": { login: "kfnr", password: "kfnr46", holding: "Автопрестиж", name: "Чанган Центр Автопрестиж", region: "ЮФО", city: "Ставрополь" },
-        "EURUS06394": { login: "jdue", password: "jdue99", holding: "", name: "Чанган Центр К-Моторс", region: "СЗФО", city: "Петрозаводск" },
-        "EURUS06405": { login: "dohy", password: "dohy32", holding: "", name: "Чанган Центр Альянс", region: "СФО", city: "Омск" },
-        "EURUS06406": { login: "jdhr", password: "jdhr88", holding: "Автопрестиж", name: "Чанган Центр Автопрестиж", region: "ПФО", city: "Самара" }
-    };
+    // ----- ДАННЫЕ (полностью из таблицы) -----
+    const data = [
+        { code: "EURUS06199", title: "Чанган Центр FRESH Волгоград", region: "ЮФО", city: "Волгоград", address: "400010, Волгоградская область, г. Волгоград, пр-кт. Им. маршала Советского Союза Г.К. Жукова, д. 94д", service: "wsve", servicePwd: "wsve65", sales: "pohf", salesPwd: "pohf16" },
+        { code: "EURUS06200", title: "Чанган Центр FRESH Воронеж", region: "ЦФО", city: "Воронеж", address: "396005, Воронежская обл., р-н Рамонский, Солнечный п., Московское шоссе ул., 16", service: "fdhu", servicePwd: "fdhu1", sales: "hswr", salesPwd: "hswr2" },
+        { code: "EURUS06213", title: "Чанган Центр Олимп", region: "СЗФО", city: "Санкт-Петербург", address: "191167, г. Санкт-Петербург, ул.Исполкомская, д.15А", service: "dgsx", servicePwd: "dgsx34", sales: "wsat", salesPwd: "wsat87" },
+        { code: "EURUS06214", title: "Чанган Центр Мэйджор Светлановский", region: "СЗФО", city: "Санкт-Петербург", address: "194223, г. Санкт-Петербург, ул. Орбели , д.35", service: "iter", servicePwd: "iter34", sales: "edcv", salesPwd: "edcv32" },
+        { code: "EURUS06214", title: "Юни Центр Мэйджор Светлановский", region: "СЗФО", city: "Санкт-Петербург", address: "194223, г. Санкт-Петербург, ул. Орбели , д.35, литера Ж", service: "gfdy", servicePwd: "gfdy43", sales: "tcvd", salesPwd: "tcvd76" },
+        { code: "EURUS06215", title: "Чанган Центр Мэйджор", region: "ЦФО", city: "Москва", address: "123007, г. Москва, 1-я Магистральная ул., дом 13, строение 1", service: "brde", servicePwd: "brde32", sales: "lkrt", salesPwd: "lkrt76" },
+        { code: "EURUS06232", title: "Чанган Центр Мэйджор Сити", region: "ЦФО", city: "Москва", address: "143420, Московская обл., г. Красногорск, д. Михалково, М9 Балтия дор., строение 2", service: "irws", servicePwd: "irws18", sales: "gcmu", salesPwd: "gcmu44" },
+        { code: "EURUS06237", title: "Чанган Центр Мэйджор Запад", region: "ЦФО", city: "Москва", address: "142784, г.Москва, п. Московский, д. Говорово, МКАД 47км, д.8, стр.1", service: "lbdh", servicePwd: "lbdh33", sales: "mnre", salesPwd: "mnre47" },
+        { code: "EURUS06238", title: "Чанган Центр Мэйджор Юг", region: "ЦФО", city: "Москва", address: "140091, Московская область, г. Дзержинский, ул. Алексеевская, д.8", service: "glcx", servicePwd: "glcx99", sales: "awrq", salesPwd: "awrq90" },
+        { code: "EURUS06239", title: "Чанган Центр Мэйджор Тушино", region: "ЦФО", city: "Москва", address: "125363, г.Москва, Цветочный проезд, д.6", service: "xztr", servicePwd: "xztr18", sales: "mbsd", salesPwd: "mbsd55" },
+        { code: "EURUS06250", title: "Юни Центр Мэйджор Север", region: "ЦФО", city: "Москва", address: "141014, Московская область, г. Мытищи, ул. Красноармейская, вл.39, стр.1, МКАД 92-й км", service: "riop", servicePwd: "riop41", sales: "sare", salesPwd: "sare94" },
+        { code: "EURUS06297", title: "Чанган Центр Мэйджор Строгино", region: "ЦФО", city: "Москва", address: "123458 г. Москва, ул. Маршала Прошлякова , д.13", service: "vblo", servicePwd: "vblo54", sales: "qazd", salesPwd: "qazd83" },
+        { code: "EURUS06293", title: "Чанган Центр ТрансТехСервис", region: "ПФО", city: "Набережные Челны", address: "423800, Респ. Татарстан, г. Набережные Челны, ул. Машиностроительная, дом 1/2", service: "xsxd", servicePwd: "xsxd37", sales: "fofw", salesPwd: "fofw75" },
+        { code: "EURUS06318", title: "Чанган Центр ТрансТехСервис Уфа", region: "ПФО", city: "Уфа", address: "450018, Респ. Башкортостан, г. Уфа, ул. Рубежная, дом 182", service: "oier", servicePwd: "oier49", sales: "dspo", salesPwd: "dspo33" },
+        { code: "EURUS06330", title: "Чанган Центр ТрансТехСервис Казань Декабристов", region: "ПФО", city: "Казань", address: "420034, Респ. Татарстан, г. Казань, ул. Декабристов, дом 81В", service: "ghye", servicePwd: "ghye70", sales: "bidx", salesPwd: "bidx62" },
+        { code: "EURUS06363", title: "Чанган Центр ТрансТехСервис Ижевск", region: "ПФО", city: "Ижевск", address: "426003, Удмуртская Респ., г. Ижевск, ул. Карла Маркса, дом 89", service: "pyws", servicePwd: "pyws63", sales: "savb", salesPwd: "savb11" },
+        { code: "EURUS06376", title: "Чанган Центр ТрансТехСервис Нижнекамск", region: "ПФО", city: "Нижнекамск", address: "423577, Республика Татарстан, г. Нижнекамск, ул. Спортивная, д. 4", service: "pilx", servicePwd: "pilx32", sales: "lksa", salesPwd: "lksa41" },
+        { code: "EURUS06384", title: "Чанган Центр ТрансТехСервис Мамадышский", region: "ПФО", city: "Казань", address: "420083, Респ. Татарстан, г. Казань, ул. Мамадышский Тракт, дом 30", service: "slvw", servicePwd: "slvw90", sales: "dqal", salesPwd: "dqal33" },
+        { code: "EURUS06216", title: "Чанган Центр Автомир на Щелковском", region: "ЦФО", city: "Москва", address: "107497, г. Москва, ул. Иркутская, д. 5/6, строение 1, помещение 321", service: "zazt", servicePwd: "zazt54", sales: "fdcc", salesPwd: "fdcc99" },
+        { code: "EURUS06217", title: "Чанган Центр Автомир на Дмитровском", region: "ЦФО", city: "Москва", address: "127247 г. Москва, Дмитровское шоссе, дом 98 стр.1", service: "vbds", servicePwd: "vbds37", sales: "epyt", salesPwd: "epyt59" },
+        { code: "EURUS06309", title: "Чанган Центр Автомир на Дунайском", region: "СЗФО", city: "Санкт-Петербург", address: "196158, г. Санкт-Петербург, Дунайский проспект, дом 25/3, лит.А", service: "tvcv", servicePwd: "tvcv39", sales: "qazc", salesPwd: "qazc31" },
+        { code: "EURUS06340", title: "Чанган Центр Автомир", region: "ЦФО", city: "Брянск", address: "241019, Брянская обл., г. Брянск, Станке Димитрова пр-кт, дом 114", service: "spre", servicePwd: "spre11", sales: "dplk", salesPwd: "dplk93" },
+        { code: "EURUS06341", title: "Чанган Центр Автомир на Петухова", region: "СФО", city: "Новосибирск", address: "630119, Новосибирская обл., г. Новосибирск, ул. Петухова, дом 87", service: "dpiq", servicePwd: "dpiq09", sales: "jpew", salesPwd: "jpew04" },
+        { code: "EURUS06369", title: "Чанган Центр Автомир Люблино", region: "ЦФО", city: "Москва", address: "109559, г. Москва, Ставропольская ул., дом 41", service: "frwa", servicePwd: "frwa36", sales: "zpkd", salesPwd: "zpkd91" },
+        { code: "EURUS06267", title: "Чанган Центр Дельта Моторс", region: "ЮФО", city: "Ростов-на-Дону", address: "344015, Ростовская обл., г. Ростов-на-Дону, ул. Малиновского, дом 172/3а", service: "drtq", servicePwd: "drtq33", sales: "fedp", salesPwd: "fedp32" },
+        { code: "EURUS06268", title: "Чанган Центр Сокол Моторс Таганрог", region: "ЮФО", city: "Таганрог", address: "347942, Ростовская обл., г. Таганрог, Ростовское ш., дом 10а, строение 2", service: "qasd", servicePwd: "qasd58", sales: "dlob", salesPwd: "dlob49" },
+        { code: "EURUS06269", title: "Чанган Центр Сокол Моторс Шолохова", region: "ЮФО", city: "Ростов-на-Дону", address: "344009, г. Ростов-на-Дону, ул. Шолохова, 235", service: "cmnb", servicePwd: "cmnb05", sales: "dewq", salesPwd: "dewq85" },
+        { code: "EURUS06300", title: "Чанган Центр Сокол Моторс Шахты", region: "ЮФО", city: "Шахты", address: "346513, Ростовская область, г. Шахты, ул.Дачная, 272Б", service: "uohg", servicePwd: "uohg66", sales: "rpit", salesPwd: "rpit16" },
+        { code: "EURUS06301", title: "Чанган Центр Сокол Моторс Волгодонск", region: "ЮФО", city: "Волгодонск", address: "347375, г. Ростовская область, г. Волгодонск, пр-т Курчатова, 50В", service: "jknc", servicePwd: "jknc12", sales: "dews", salesPwd: "dews43" },
+        { code: "EURUS06223", title: "Юни Центр Санрайз Групп", region: "ЦФО", city: "Москва", address: "141402, Московская область, г. Химки, Ленинградское шоссе, вл. 15", service: "sgfr", servicePwd: "sgfr48", sales: "qper", salesPwd: "qper77" },
+        { code: "EURUS06359", title: "Юни Центр Санрайз Групп", region: "СЗФО", city: "Мурманск", address: "183034, Мурманская обл., г. Мурманск, Домостроительная ул., дом 16", service: "dfpa", servicePwd: "dfpa17", sales: "erlk", salesPwd: "erlk09" },
+        { code: "EURUS06345", title: "Чанган Центр Вологда", region: "СЗФО", city: "Вологда", address: "160028, г. Вологда, Окружное ш., дом 8а", service: "zxuy", servicePwd: "zxuy22", sales: "wpbf", salesPwd: "wpbf00" },
+        { code: "EURUS06221", title: "Чанган Центр Вагнер", region: "СЗФО", city: "Санкт-Петербург", address: "198205, г. Санкт-Петербург, Таллинское ш. (Старо-Паново тер.), д. 157, лит. А.", service: "clue", servicePwd: "clue43", sales: "sprw", salesPwd: "sprw31" },
+        { code: "EURUS06316", title: "Чанган Центр Вагнер Выборгский", region: "СЗФО", city: "Санкт-Петербург", address: "194362, г. Санкт-Петербург, Выборгское ш., дом 352, литера А", service: "srqp", servicePwd: "srqp97", sales: "cvye", salesPwd: "cvye04" },
+        { code: "EURUS06351", title: "Чанган Центр Окружная", region: "СЗФО", city: "Калининград", address: "236009, Калининградская обл., г. Калининград, ул. Большая Окружная, дом 19", service: "erty", servicePwd: "erty05", sales: "ohvr", salesPwd: "ohvr83" },
+        { code: "EURUS06224", title: "Чанган Центр Оптима Краснодар", region: "ЮФО", city: "Краснодар", address: "350051, Краснодарский край, г.Краснодар, ул. им. Дзержинского, д. 229/5", service: "lbvd", servicePwd: "lbvd71", sales: "kloc", salesPwd: "kloc03" },
+        { code: "EURUS06228", title: "Чанган Центр Оптима Сочи", region: "ЮФО", city: "Сочи", address: "354003, Краснодарский край, г. Сочи, ул. Конституции СССР, 48", service: "sdrq", servicePwd: "sdrq21", sales: "ertq", salesPwd: "ertq08" },
+        { code: "EURUS06252", title: "Чанган Центр ГК АсАвто Тольятти", region: "ПФО", city: "Тольятти", address: "445140, Тольятти, с. Тифомеевка, ул.Солнечная 1а", service: "gfda", servicePwd: "gfda78", sales: "sadu", salesPwd: "sadu43" },
+        { code: "EURUS06338", title: "Чанган Центр Автобан", region: "УФО", city: "Екатеринбург", address: "620091, Свердловская обл., г. Екатеринбург, ул. Бабушкина, дом 9", service: "zxcm", servicePwd: "zxcm33", sales: "dotw", salesPwd: "dotw08" },
+        { code: "EURUS06289", title: "Чанган Центр Новомосковск", region: "ЦФО", city: "Новомосковск", address: "301657, г. Новомосковск, ул. Космонавтов,  д. 37Д", service: "swql", servicePwd: "swql55", sales: "erti", salesPwd: "erti00" },
+        { code: "EURUS06328", title: "Чанган Центр Агат на Комсомольском", region: "ПФО", city: "Нижний Новгород", address: "603028, Нижегородская обл., г. Нижний Новгород, Комсомольское ш., дом 7В", service: "dfpo", servicePwd: "dfpo11", sales: "vcjs", salesPwd: "vcjs22" },
+        { code: "EURUS06282", title: "Чанган Центр АвтоЮг", region: "ЮФО", city: "Ставрополь", address: "355042, г. Ставрополь, ул. Доваторцев, д. 62", service: "sdpo", servicePwd: "sdpo33", sales: "vmzg", salesPwd: "vmzg44" },
+        { code: "EURUS06355", title: "Чанган Центр Юг-Авто", region: "ЮФО", city: "Краснодар", address: "385100, Респ. Адыгея, Тахтамукайский р-н, Тахтамукай аул, ул. Краснодарская, дом 3", service: "wnbs", servicePwd: "wnbs67", sales: "lktr", salesPwd: "lktr98" },
+        { code: "EURUS06263", title: "Чанган Центр АвтоГЕРМЕС", region: "ЦФО", city: "Москва", address: "121471, г. Москва, Рябиновая ул., д. 43Б", service: "dfpp", servicePwd: "dfpp55", sales: "dpyy", salesPwd: "dpyy33" },
+        { code: "EURUS06292", title: "Чанган Центр Чебоксары", region: "ПФО", city: "Чебоксары", address: "428030, Чувашская Республика - Чувашия, Чебоксарский р-н, д. Пихтулино, ул. Автомобилистов, дом 2", service: "xlmn", servicePwd: "xlmn77", sales: "fcal", salesPwd: "fcal81" },
+        { code: "EURUS06285", title: "Чанган Центр Автоимпорт", region: "ЦФО", city: "Тула", address: "300022, Тульская обл., г. Тула, ул. Октябрьская, дом 320А/1", service: "dfcx", servicePwd: "dfcx65", sales: "iuqw", salesPwd: "iuqw29" },
+        { code: "EURUS06286", title: "Чанган Центр Автоимпорт Юг", region: "ЦФО", city: "Рязань", address: "390047, г. Рязань, ул. Куйбышевское шоссе, 42В", service: "fpqm", servicePwd: "fpqm01", sales: "oiqa", salesPwd: "oiqa05" },
+        { code: "EURUS06326", title: "Чанган Центр на Гагарина", region: "ПФО", city: "Нижний Новгород", address: "603057, Нижегородская обл., г. Нижний Новгород, пр-кт Гагарина, дом 29д", service: "linw", servicePwd: "linw88", sales: "fgbr", salesPwd: "fgbr06" },
+        { code: "EURUS06191", title: "Чанган Центр Автокласс", region: "ЦФО", city: "Тула", address: "300045, Тульская обл., г. Тула, Новомосковское ш., дом 27, офис 1", service: "nbxc", servicePwd: "nbxc32", sales: "mnbw", salesPwd: "mnbw26" },
+        { code: "EURUS06236", title: "Чанган Центр ААА Моторс", region: "ЮФО", city: "Ростов-на-Дону", address: "344000, Ростовская обл., г. Ростов-на-Дону, ул.Текучева, д.352 Б", service: "vfys", servicePwd: "vfys91", sales: "yucv", salesPwd: "yucv66" },
+        { code: "EURUS06305", title: "Чанган Центр Максимум", region: "СЗФО", city: "Санкт-Петербург", address: "188669, Ленинградская обл., Всеволожский муниципальный район, Муринское городское поселение, территория Транспортная, дом 6", service: "pjvc", servicePwd: "pjvc33", sales: "rtbv", salesPwd: "rtbv87" },
+        { code: "EURUS06281", title: "Чанган Центр БЦР Моторс", region: "ПФО", city: "Нижний Новгород", address: "603058, г. Нижний Новгород, ул. Новикова-Прибоя, 4", service: "ghlk", servicePwd: "ghlk54", sales: "dfgm", salesPwd: "dfgm90" },
+        { code: "EURUS06279", title: "Чанган Центр Арена Авто", region: "ПФО", city: "Тольятти", address: "445043, Самарская область,  г. Тольятти, Южное шоссе, 32", service: "demj", servicePwd: "demj97", sales: "zxbv", salesPwd: "zxbv30" },
+        { code: "EURUS06145", title: "Чанган Центр Автолига", region: "ПФО", city: "Нижний Новгород", address: "603124, Нижегородская обл., г. Нижний Новгород, Московское ш., дом 302, корпус Г", service: "pmnf", servicePwd: "pmnf11", sales: "cvcs", salesPwd: "cvcs77" },
+        { code: "EURUS06173", title: "Чанган Центр Софийская", region: "СЗФО", city: "Санкт-Петербург", address: "192102, г. Санкт-Петербург, ул. Софийская, дом 2", service: "gfmn", servicePwd: "gfmn80", sales: "zxxr", salesPwd: "zxxr29" },
+        { code: "EURUS06211", title: "Чанган Центр Агат", region: "ЮФО", city: "Волгоград", address: "400048, Волгоградская обл., г. Волгоград, Авиаторов ш., дом 2А", service: "sopz", servicePwd: "sopz60", sales: "zzsp", salesPwd: "zzsp81" },
+        { code: "EURUS06242", title: "Чанган Центр АСПЭК-Авто", region: "ПФО", city: "Ижевск", address: "426072 г. Ижевск, ул. Союзная, д. 2Д/1", service: "xpre", servicePwd: "xpre07", sales: "pwet", salesPwd: "pwet09" },
+        { code: "EURUS06242", title: "Юни Центр АСПЭК-Авто", region: "ПФО", city: "Ижевск", address: "426072 г. Ижевск, ул. Союзная, д. 2Д/2", service: "phbd", servicePwd: "phbd84", sales: "yyhc", salesPwd: "yyhc71" },
+        { code: "EURUS06280", title: "Чанган Центр Темп Авто Ростов-на-Дону", region: "ЮФО", city: "Ростов-на-Дону", address: "346720, Ростовская обл., Аксайский р-н, г. Аксай, Западная ул., дом 37, корпус В", service: "gfdb", servicePwd: "gfdb08", sales: "gfqq", salesPwd: "gfqq99" },
+        { code: "EURUS06069", title: "Чанган Центр Базис Пермякова", region: "УФО", city: "Тюмень", address: "625051 г. Тюмень, Пермякова, 19", service: "hgvv", servicePwd: "hgvv40", sales: "coww", salesPwd: "coww81" },
+        { code: "EURUS06306", title: "Чанган Центр Ринг Воронеж", region: "ЦФО", city: "Воронеж", address: "394033, г. Воронеж, ул. Изыскателей, д.39, корп.2", service: "dfoe", servicePwd: "dfoe72", sales: "vcdd", salesPwd: "vcdd63" },
+        { code: "EURUS06403", title: "Чанган Центр Ринг Авто", region: "ЦФО", city: "Липецк", address: "398008, Липецкая обл., г. Липецк, ул. 50 лет НЛМК, строение 24", service: "bbtt", servicePwd: "bbtt95", sales: "pksd", salesPwd: "pksd11" },
+        { code: "EURUS06329", title: "Чанган Центр Авторай", region: "ПФО", city: "Ульяновск", address: "432067, Ульяновская обл., г. Ульяновск, ул. Алексея Наганова, дом 14", service: "dcur", servicePwd: "dcur73", sales: "gvxx", salesPwd: "gvxx24" },
+        { code: "EURUS06147", title: "Чанган Центр Лидер", region: "ЦФО", city: "Рязань", address: "390020  г. Рязань, Московское шоссе, д.65в", service: "jgff", servicePwd: "jgff77", sales: "vvew", salesPwd: "vvew66" },
+        { code: "EURUS06288", title: "Чанган Центр АГАТ Аэропорт", region: "ЮФО", city: "Астрахань", address: "414018, Астраханская область, г. Астрахань, ул. Аэропортовское шоссе, д. 73", service: "grsl", servicePwd: "grsl45", sales: "fsoo", salesPwd: "fsoo29" },
+        { code: "EURUS06347", title: "Чанган Центр Автопортрет", region: "СЗФО", city: "Санкт-Петербург", address: "197374, г. Санкт-Петербург, ул. Школьная, дом 75, корпус 2, лит. А", service: "ojvd", servicePwd: "ojvd05", sales: "toof", salesPwd: "toof78" },
+        { code: "EURUS06251", title: "Чанган Центр Агат Ярославль", region: "ЦФО", city: "Ярославль", address: "150044, Ярославская обл., г. Ярославль, ш. Промышленное, д. 53", service: "xxoi", servicePwd: "xxoi43", sales: "iihf", salesPwd: "iihf66" },
+        { code: "EURUS06248", title: "Чанган Центр Новокар", region: "ЮФО", city: "Новороссийск", address: "353960, Краснодарский край, г.о. г. Новороссийск, г. Новороссийск, тер. Цемдолина, ул. Золотая Рыбка, дом 112", service: "nbrf", servicePwd: "nbrf05", sales: "wslb", salesPwd: "wslb63" },
+        { code: "EURUS06229", title: "Чанган Центр Саранск", region: "ПФО", city: "Саранск", address: "430014, Респ. Мордовия, г.о. Саранск, г. Саранск, ул. Волгоградская, д. 91", service: "sdec", servicePwd: "sdec47", sales: "ppoi", salesPwd: "ppoi81" },
+        { code: "EURUS06337", title: "Чанган Центр Квазар", region: "ЦФО", city: "Москва", address: "142715, Московская область, Ленинский район, сельское поселение Совхоз им. Ленина, 26 км. МКАД, владение 5, строение 4", service: "eglg", servicePwd: "eglg03", sales: "innd", salesPwd: "innd50" },
+        { code: "EURUS06299", title: "Чанган Центр КАН АВТО", region: "ПФО", city: "Казань", address: "420064, Респ. Татарстан, г. Казань, ул. Оренбургский Тракт, дом 209в", service: "ooes", servicePwd: "ooes60", sales: "kmcc", salesPwd: "kmcc44" },
+        { code: "EURUS06149", title: "Чанган Центр Автосити", region: "ЦФО", city: "Воронеж", address: "394065, г. Воронеж, Проспект Патриотов, д.47", service: "zlmf", servicePwd: "zlmf73", sales: "gcla", salesPwd: "gcla33" },
+        { code: "EURUS06325", title: "Чанган Центр Уникум", region: "УФО", city: "Нижний Тагил", address: "620049, г. Нижний Тагил, Черноисточинское шоссе, дом 74 А", service: "sdoj", servicePwd: "sdoj66", sales: "uutr", salesPwd: "uutr48" },
+        { code: "EURUS06193", title: "Чанган Центр Автофорум Восток", region: "ПФО", city: "Саратов", address: "410018 г. Саратов, ул. Усть-Курдюмская, д. 33", service: "ggdd", servicePwd: "ggdd53", sales: "lljj", salesPwd: "lljj54" },
+        { code: "EURUS06187", title: "Чанган Центр Регинас Магнитогорск", region: "УФО", city: "Магнитогорск", address: "455008, г. Магнитогорск, ул. Зеленый Лог, 53", service: "jgrc", servicePwd: "jgrc76", sales: "xoes", salesPwd: "xoes69" },
+        { code: "EURUS06201", title: "Чанган Центр Регинас на Кашириных", region: "УФО", city: "Челябинск", address: "454003, г. Челябинск, ул. Братьев Кашириных, 141А", service: "vvoo", servicePwd: "vvoo40", sales: "xord", salesPwd: "xord42" },
+        { code: "EURUS06201", title: "Юни Центр Регинас на Кашириных", region: "УФО", city: "Челябинск", address: "454003, г. Челябинск, ул. Братьев Кашириных, 141Б", service: "ihcv", servicePwd: "ihcv44", sales: "sljf", salesPwd: "sljf65" },
+        { code: "EURUS06202", title: "Чанган Центр Регинас на Гурзуфской", region: "УФО", city: "Екатеринбург", address: "620102, г. Екатеринбург, ул. Гурзуфская, 63", service: "dhre", servicePwd: "dhre11", sales: "ekgf", salesPwd: "ekgf15" },
+        { code: "EURUS06203", title: "Чанган Центр Регинас Миасс", region: "УФО", city: "Миасс", address: "456320, г. Миасс, Тургоякское шоссе, 3/19", service: "bbed", servicePwd: "bbed28", sales: "oifn", salesPwd: "oifn12" },
+        { code: "EURUS06245", title: "Чанган Центр Регинас на Свердловском", region: "УФО", city: "Челябинск", address: "454008, г. Челябинск, Свердловский Тракт, 5", service: "bflo", servicePwd: "bflo19", sales: "vusu", salesPwd: "vusu14" },
+        { code: "EURUS06254", title: "Чанган Центр Регинас на Высоцкого", region: "УФО", city: "Екатеринбург", address: "620072, г. Екатеринбург, ул. Высоцкого, 3", service: "uhdd", servicePwd: "uhdd55", sales: "ssoi", salesPwd: "ssoi51" },
+        { code: "EURUS06398", title: "Чанган Центр Регинас на Ленина", region: "УФО", city: "Челябинск", address: "454007, г. Челябинск, проспект Ленина, д. 19Д", service: "srec", servicePwd: "srec11", sales: "pnnd", salesPwd: "pnnd12" },
+        { code: "EURUS06304", title: "Чанган Центр АвтоФорум", region: "ПФО", city: "Саратов", address: "410020 г. Саратов, ул. им. Шехурдина А.П., д.6, К.6", service: "zasz", servicePwd: "zasz13", sales: "cfee", salesPwd: "cfee16" },
+        { code: "EURUS06246", title: "Чанган Центр Фастар на Речном", region: "СФО", city: "Новосибирск", address: "630009, Новосибирская область, г. Новосибирск, ул. Большевистская , дом  14/2", service: "bbge", servicePwd: "bbge21", sales: "reoj", salesPwd: "reoj99" },
+        { code: "EURUS06311", title: "Чанган Центр ДАВ-АВТО", region: "ПФО", city: "Пермь", address: "614025, Пермский край, г. Пермь, ул. Героев Хасана, дом 76", service: "wwjb", servicePwd: "wwjb33", sales: "qpgd", salesPwd: "qpgd55" },
+        { code: "EURUS06150", title: "Чанган Центр АЦ Кунцево", region: "ЦФО", city: "Москва", address: "143025, Московская обл., г. Одинцово, с. Немчиновка, ул. Московская, дом 61", service: "rtdd", servicePwd: "rtdd77", sales: "bbdc", salesPwd: "bbdc96" },
+        { code: "EURUS06137", title: "Чанган Центр Экспокар Краснодар", region: "ЮФО", city: "Краснодар", address: "385140, Россия, Ресублика Адыгея, Тахтамукайский район, пгт Яблоновский, ул. Тургеневское шоссе 31", service: "hhgw", servicePwd: "hhgw84", sales: "jbdd", salesPwd: "jbdd66" },
+        { code: "EURUS06344", title: "Чанган Центр Автоград", region: "УФО", city: "Тюмень", address: "625014, Тюменская обл., г. Тюмень, ул. Республики, дом 280", service: "gedd", servicePwd: "gedd81", sales: "iydd", salesPwd: "iydd42" },
+        { code: "EURUS06255", title: "Чанган Центр Самара-Авто", region: "ПФО", city: "Самара", address: "443125, г. Самара, ул. Московское шоссе, 264", service: "gcsx", servicePwd: "gcsx83", sales: "iydf", salesPwd: "iydf77" },
+        { code: "EURUS06287", title: "Чанган Центр Энгельс", region: "ПФО", city: "Энгельс", address: "413112, Саратовская обл., г. Энгельс, проспект Волжский, здание 75, Литера А", service: "dduu", servicePwd: "dduu99", sales: "ygvc", salesPwd: "ygvc44" },
+        { code: "EURUS06270", title: "Чанган Центр Темп Авто", region: "ЮФО", city: "Краснодар", address: "350010, Краснодарский край, г. Краснодар, ул. Ростовское шоссе, 12/6", service: "yfsd", servicePwd: "yfsd33", sales: "jjhd", salesPwd: "jjhd65" },
+        { code: "EURUS06154", title: "Чанган Центр Барнаул", region: "СФО", city: "Барнаул", address: "656067, Алтайский край,  г. Барнаул, проезд Северный Власихинский, д. 65", service: "ddoo", servicePwd: "ddoo29", sales: "brph", salesPwd: "brph70" },
+        { code: "EURUS06400", title: "Юни Центр Барнаул", region: "СФО", city: "Барнаул", address: "656006, Алтайский край, г. Барнаул, ул. Малахова, д. 94А", service: "trnb", servicePwd: "trnb00", sales: "zxwp", salesPwd: "zxwp08" },
+        { code: "EURUS06013", title: "Чанган Центр Альметьевск", region: "ПФО", city: "Альметьевск", address: "423454, г. Альметьевск, ул. Геофизическая, 58/2", service: "sdom", servicePwd: "sdom13", sales: "xxpp", salesPwd: "xxpp82" },
+        { code: "EURUS06107", title: "Чанган Центр Диалог Авто", region: "ПФО", city: "Казань", address: "420004, г. Казань, Горьковское шоссе, д. 47, к.1, офис 101", service: "hgvs", servicePwd: "hgvs23", sales: "diop", salesPwd: "diop68" },
+        { code: "EURUS06256", title: "Чанган Центр АсАвто Юг", region: "ПФО", city: "Самара", address: "443085, Самарская обл., г. Самара, Южное шоссе, 10", service: "eiyt", servicePwd: "eiyt48", sales: "bvdq", salesPwd: "bvdq11" },
+        { code: "EURUS06061", title: "Чанган Центр Демидыч Пермь", region: "ПФО", city: "Пермь", address: "614060, г. Пермь, ул. Уральская, д. 119", service: "aaiu", servicePwd: "aaiu65", sales: "cdoo", salesPwd: "cdoo83" },
+        { code: "EURUS06261", title: "Чанган Центр Демидыч Уфа", region: "ПФО", city: "Уфа", address: "450032, г. Уфа, ул. Дмитрия Донского, д. 53", service: "hecb", servicePwd: "hecb39", sales: "wlvq", salesPwd: "wlvq22" },
+        { code: "EURUS06261", title: "Юни Центр Демидыч Уфа", region: "ПФО", city: "Уфа", address: "450032 г. Уфа, ул. Дмитрия Донского, д.53а", service: "ssbr", servicePwd: "ssbr69", sales: "wojc", salesPwd: "wojc34" },
+        { code: "EURUS06308", title: "Чанган Центр Прагматика Купчино", region: "СЗФО", city: "Санкт-Петербург", address: "192289, г. Санкт-Петербург, Малая Балканская, дом 57", service: "xesd", servicePwd: "xesd33", sales: "ddjh", salesPwd: "ddjh65" },
+        { code: "EURUS06204", title: "Чанган Центр Киров", region: "ПФО", city: "Киров", address: "610033, Кировская обл., г. Киров, ул. Московская, дом 106", service: "ernb", servicePwd: "ernb77", sales: "ccyy", salesPwd: "ccyy11" },
+        { code: "EURUS06189", title: "Чанган Центр Тверь", region: "ЦФО", city: "Тверь", address: "170546, Тверская область, Калининский район, сп. Бурашевское, Промышленная зона Боровлево-1, комплекс 1, стр. 1", service: "ggfj", servicePwd: "ggfj34", sales: "uhfd", salesPwd: "uhfd66" },
+        { code: "EURUS06155", title: "Чанган Центр АвтоГрад в Добром", region: "ЦФО", city: "Владимир", address: "600032, Владимирская обл., г. Владимир, ул. Растопчина, дом 1Б", service: "azsf", servicePwd: "azsf71", sales: "fkuc", salesPwd: "fkuc33" },
+        { code: "EURUS06163", title: "Чанган Центр Белгород", region: "ЦФО", city: "Белгород", address: "308010,  г. Белгород, ул. Студенческая, 1Л", service: "hymc", servicePwd: "hymc94", sales: "dugc", salesPwd: "dugc99" },
+        { code: "EURUS06183", title: "Чанган Центр Минеральные Воды", region: "СКФО", city: "Минеральные Воды", address: "357204, Ставропольский край, Минераловодский р-н, х. Красный Пахарь, Автомобильная ул., дом 19, корпус 2", service: "dssl", servicePwd: "dssl34", sales: "bvfr", salesPwd: "bvfr55" },
+        { code: "EURUS06151", title: "Чанган Центр Авилон", region: "ЦФО", city: "Москва", address: "109316, г. Москва, Волгоградский пр., д.41, корп.1", service: "vbbq", servicePwd: "vbbq17", sales: "ofdx", salesPwd: "ofdx06" },
+        { code: "EURUS06243", title: "Чанган Центр Калуга", region: "ЦФО", city: "Калуга", address: "248025, г. Калуга, ул. Зерновая, д.52", service: "etyi", servicePwd: "etyi11", sales: "erfd", salesPwd: "erfd18" },
+        { code: "EURUS06253", title: "Юни Центр Брянск", region: "ЦФО", city: "Брянск", address: "241050, г. Брянск, пр-т Станке Димитрова, 45", service: "hgff", servicePwd: "hgff46", sales: "dhrz", salesPwd: "dhrz77" },
+        { code: "EURUS06283", title: "Чанган Центр Автосалон-2000", region: "ПФО", city: "Оренбург", address: "460041, Оренбургская обл., г. Оренбург, Нежинское шоссе, дом 9", service: "dduy", servicePwd: "dduy06", sales: "zzsw", salesPwd: "zzsw22" },
+        { code: "EURUS06284", title: "Чанган Центр Автосалон-2000", region: "ПФО", city: "Орск", address: "Оренбургская обл., г. Орск, Новый город, 234 м на северо-запад от АЗС ЗАО «Уралтехснабпром» по ул. Новотроицкое шоссе, дом 60", service: "kvnq", servicePwd: "kvnq39", sales: "hhgf", salesPwd: "hhgf64" },
+        { code: "EURUS06312", title: "Чанган Центр Арконт", region: "ЮФО", city: "Волжский", address: "404133, Волгоградская обл., г. Волжский, просп. Ленина, дом 359", service: "mnrr", servicePwd: "mnrr32", sales: "yggv", salesPwd: "yggv41" },
+        { code: "EURUS06385", title: "Чанган Центр Арконт", region: "ЮФО", city: "Краснодар", address: "350912, Краснодарский край, г. Краснодар, ул. Аэропортовская, дом 4", service: "brjh", servicePwd: "brjh08", sales: "fdou", salesPwd: "fdou34" },
+        { code: "EURUS06370", title: "Чанган Центр Курск", region: "ЦФО", city: "Курск", address: "305047, Курская обл., г.о. город Курск, ул. Энгельса, дом 173Д", service: "fdwl", servicePwd: "fdwl30", sales: "ubdr", salesPwd: "ubdr33" },
+        { code: "EURUS06381", title: "Чанган Центр Корс", region: "ЦФО", city: "Коломна", address: "140483, Московская обл., г. Коломна, с. Никульское, тер. автодорога М5 Урал, строение 1В", service: "ceap", servicePwd: "ceap46", sales: "bbtl", salesPwd: "bbtl35" },
+        { code: "EURUS06395", title: "Чанган Центр Корс", region: "ЦФО", city: "Орел", address: "302009, Орловская обл., г. Орёл, ул. Раздольная, дом 8", service: "btkk", servicePwd: "btkk17", sales: "voer", salesPwd: "voer46" },
+        { code: "EURUS06366", title: "Юни Центр Автолоцман", region: "ПФО", city: "Пенза", address: "440028, Пензенская обл., г. Пенза, пр-кт Победы, дом 53Б", service: "rrkd", servicePwd: "rrkd53", sales: "iyff", salesPwd: "iyff85" },
+        { code: "EURUS06368", title: "Чанган Центр Аларм Моторс", region: "СЗФО", city: "Санкт-Петербург", address: "194355, г. Санкт-Петербург, Выборгское ш., дом 27", service: "cotd", servicePwd: "cotd48", sales: "fhjh", salesPwd: "fhjh37" },
+        { code: "EURUS06372", title: "Чанган Центр АТК Моторс", region: "ПФО", city: "Самара", address: "443046, Самарская обл., г. Самара, п. Зубчаниновка, ш. Аэропортовское, участок 1Ж, строение 2", service: "ggwi", servicePwd: "ggwi28", sales: "djlu", salesPwd: "djlu92" },
+        { code: "EURUS06373", title: "Чанган Центр Оптима Тамань", region: "ЮФО", city: "Краснодар", address: "353556, Краснодарский край, Темрюкский р-н, станица Тамань, ул. 8-я Гвардейская, дом 97", service: "lgsr", servicePwd: "lgsr60", sales: "gdoj", salesPwd: "gdoj63" },
+        { code: "EURUS06374", title: "Чанган Центр Рыбинск", region: "ЦФО", city: "Рыбинск", address: "152973, Ярославская обл., Рыбинский муниципальный район, Покровское сельское поселение, деревня Выгорода, земельный участок 14В", service: "jdlh", servicePwd: "jdlh62", sales: "ofrb", salesPwd: "ofrb17" },
+        { code: "EURUS06375", title: "Чанган Центр Агат на Промышленном", region: "ЦФО", city: "Владимир", address: "600005, Владимирская обл., г. Владимир, Промышленный проезд, дом 1", service: "soyu", servicePwd: "soyu53", sales: "dfik", salesPwd: "dfik93" },
+        { code: "EURUS06377", title: "Чанган Центр Автопрестиж", region: "ПФО", city: "Пермь", address: "614068, Пермский край, г. Пермь, ул. Спешилова, 77", service: "khfd", servicePwd: "khfd32", sales: "ohfe", salesPwd: "ohfe95" },
+        { code: "EURUS06386", title: "Чанган Центр Рольф Ясенево", region: "ЦФО", city: "Москва", address: "117628, г. Москва, вн.тер.г. муниципальный округ Коммунарка, территория МКАД, километр 40-й, дом 1, строение 2", service: "rdjl", servicePwd: "rdjl91", sales: "kidu", salesPwd: "kidu54" },
+        { code: "EURUS06387", title: "Чанган Центр Рольф Химки", region: "ЦФО", city: "Москва", address: "141410, Московская обл., г. Химки, Ленинградское ш., владение 21", service: "igrv", servicePwd: "igrv35", sales: "pjdg", salesPwd: "pjdg92" },
+        { code: "EURUS06389", title: "Чанган Центр БЦР-ПЕЧЁРЫ", region: "ПФО", city: "Нижний Новгород", address: "603163, Нижегородская обл., г. Нижний Новгород, Казанское ш., дом 6Б", service: "ldhi", servicePwd: "ldhi05", sales: "eely", salesPwd: "eely43" },
+        { code: "EURUS06388", title: "Чанган Центр Автопродикс", region: "СЗФО", city: "Санкт-Петербург", address: "195299, г. Санкт-Петербург, ул. Руставели, дом 55, корпус 1, стр. 2, пом.13", service: "ofrn", servicePwd: "ofrn97", sales: "ovdn", salesPwd: "ovdn30" },
+        { code: "EURUS06390", title: "Чанган Центр АНТ", region: "СФО", city: "Барнаул", address: "656006, Алтайский край, г. Барнаул, Павловский тракт, дом 249Е", service: "zpiu", servicePwd: "zpiu40", sales: "ohff", salesPwd: "ohff73" },
+        { code: "EURUS06391", title: "Чанган Центр Сатурн", region: "УФО", city: "Челябинск", address: "454045, Челябинская обл., г. Челябинск, ул. Блюхера, дом 123А", service: "tffg", servicePwd: "tffg02", sales: "jddq", salesPwd: "jddq74" },
+        { code: "EURUS06392", title: "Чанган Центр Фрагмент на Копейском", region: "УФО", city: "Челябинск", address: "454119, г. Челябинск, Копейское шоссе, д. 33а", service: "dpuy", servicePwd: "dpuy55", sales: "llkw", salesPwd: "llkw66" },
+        { code: "EURUS06393", title: "Чанган Центр СИЛЬВЕР", region: "УФО", city: "Курган", address: "640014, Курганская обл., г. Курган, Маршала Голикова пр-кт, дом 10Ж", service: "fdwe", servicePwd: "fdwe20", sales: "rhfi", salesPwd: "rhfi43" },
+        { code: "EURUS06397", title: "Чанган Центр СИЛЬВЕР", region: "УФО", city: "Магнитогорск", address: "453618, Респ. Башкортостан, Абзелиловский р-н, с. Красная Башкирия, ул. 50 лет Победы, дом 56", service: "hfue", servicePwd: "hfue85", sales: "ljfg", salesPwd: "ljfg83" },
+        { code: "EURUS06396", title: "Чанган Центр Агат-Авто", region: "СФО", city: "Братск", address: "665717, Иркутская обл., г.о. город Братск, г. Братск, ж/р Центральный, ул. Коммунальная, дом 9", service: "ihcy", servicePwd: "ihcy03", sales: "loey", salesPwd: "loey86" },
+        { code: "EURUS06361", title: "Чанган Центр Фаравто", region: "СКФО", city: "Махачкала", address: "368530, Респ. Дагестан, Карабудахкентский р-н, с. Карабудахкент, тер. Аэропорт, ул. Аэропортовская, здание 9", service: "serd", servicePwd: "serd23", sales: "eldh", salesPwd: "eldh11" },
+        { code: "EURUS06356", title: "Чанган Центр НИКА АВТО", region: "ПФО", city: "Оренбург", address: "460056, Оренбургская обл., г. Оренбург, улица Волгоградская, дом 5/3", service: "ngbd", servicePwd: "ngbd79", sales: "lfji", salesPwd: "lfji81" },
+        { code: "EURUS06360", title: "Чанган Центр Автомаркет", region: "СЗФО", city: "Мурманск", address: "183038, Мурманская обл., г. Мурманск, Кольский пр-кт, дом 118", service: "jdvg", servicePwd: "jdvg54", sales: "kgyf", salesPwd: "kgyf33" },
+        { code: "EURUS06354", title: "Чанган Центр Великий Новгород", region: "СЗФО", city: "Великий Новгород", address: "173008, г. Великий Новгород, ул. Северная, д.2", service: "hdon", servicePwd: "hdon63", sales: "hfie", salesPwd: "hfie35" },
+        { code: "EURUS06404", title: "Юни Центр Великий Новгород", region: "СЗФО", city: "Великий Новгород", address: "173008, Новгородская обл., г. Великий Новгород, ул. Большая Санкт-Петербургская, дом 173, строение 3", service: "artg", servicePwd: "artg51", sales: "spyf", salesPwd: "spyf77" },
+        { code: "EURUS06039", title: "Чанган Центр Автостиль Автово", region: "СЗФО", city: "Санкт-Петербург", address: "198152, г. Санкт-Петербург, ул. Краснопутиловская, д.65, литера А, пом.5-Н №3", service: "dlie", servicePwd: "dlie44", sales: "ppoq", salesPwd: "ppoq18" },
+        { code: "EURUS06209", title: "Чанган Центр Армада-Авто", region: "ПФО", city: "Ульяновск", address: "432045, Ульяновская область, город Ульяновск, Московское шоссе, дом 5В стр. 1", service: "ziun", servicePwd: "ziun55", sales: "jfkp", salesPwd: "jfkp83" },
+        { code: "EURUS06265", title: "Чанган Центр Оскол", region: "ЦФО", city: "Старый Оскол", address: "309516, Белгородская область, город Старый Оскол,проспект Алексея Угарова, 18Д", service: "qety", servicePwd: "qety80", sales: "mdhb", salesPwd: "mdhb92" },
+        { code: "EURUS06298", title: "Чанган Центр Орехово-Зуево", region: "ЦФО", city: "Орехово-Зуево", address: "142611, Московская область, г. Орехово-Зуево, ул. Красина, д. 4.", service: "ljds", servicePwd: "ljds61", sales: "wonf", salesPwd: "wonf08" },
+        { code: "EURUS06135", title: "Чанган Центр Калининград", region: "СЗФО", city: "Калининград", address: "236011,  г. Калининград, ул. Аллея Смелых, д. 200б", service: "okge", servicePwd: "okge61", sales: "oygc", salesPwd: "oygc98" },
+        { code: "EURUS06272", title: "Чанган Центр Томск", region: "СФО", city: "Томск", address: "634031, г. Томск, ул. Ивановского, 8в", service: "dytf", servicePwd: "dytf54", sales: "efgh", salesPwd: "efgh25" },
+        { code: "EURUS06093", title: "Чанган Центр Серпухов", region: "ЦФО", city: "Серпухов", address: "142204, Московская область, г. Серпухов, Московское шоссе, д.106", service: "kwrd", servicePwd: "kwrd36", sales: "vcte", salesPwd: "vcte12" },
+        { code: "EURUS06349", title: "Юни Центр Хабаровск", region: "ДФО", city: "Хабаровск", address: "680042, Хабаровский край, г. Хабаровск, ул. Воронежская, дом 79", service: "vzxo", servicePwd: "vzxo02", sales: "sdmb", salesPwd: "sdmb19" },
+        { code: "EURUS06350", title: "Чанган Центр Медведь", region: "СФО", city: "Абакан", address: "655017, Респ. Хакасия, г. Абакан, Молодежный кв-л, дом 2В", service: "dvne", servicePwd: "dvne06", sales: "fytr", salesPwd: "fytr44" },
+        { code: "EURUS06307", title: "Юни Центр Абакан", region: "СФО", city: "Абакан", address: "655017, Респ. Хакасия, г. Абакан, квартал Молодежный 5 \"Л\".", service: "jvjr", servicePwd: "jvjr27", sales: "iied", salesPwd: "iied46" },
+        { code: "EURUS06240", title: "Чанган Центр Кузбасс", region: "СФО", city: "Кемерово", address: "650066, Кемеровская область - Кузбасс, г. Кемерово, проспект Октябрьский, 2А", service: "gfod", servicePwd: "gfod82", sales: "gfcv", salesPwd: "gfcv71" },
+        { code: "EURUS06197", title: "Чанган Центр Нижневартовск", region: "УФО", city: "Нижневартовск", address: "628616, Ханты-Мансийский Автономный округ - Югра АО, г. Нижневартовск, ул. Северная, владение 33А", service: "mnus", servicePwd: "mnus88", sales: "xxhh", salesPwd: "xxhh43" },
+        { code: "EURUS06220", title: "Чанган Центр Автополе", region: "СЗФО", city: "Санкт-Петербург", address: "188693, Ленинградская обл., Всеволожский р-н, г. Кудрово, г.п. Заневское, пр-кт Строителей, здание 35 торговый зал 2-Н", service: "sohg", servicePwd: "sohg56", sales: "clgs", salesPwd: "clgs43" },
+        { code: "EURUS06332", title: "Юни Центр Улан-Удэ", region: "ДФО", city: "Улан-Удэ", address: "670023, Респ. Бурятия, г. Улан-Удэ, ул. Кабанская, дом 52", service: "pgtd", servicePwd: "pgtd01", sales: "ojdg", salesPwd: "ojdg33" },
+        { code: "EURUS06185", title: "Чанган Центр Восток", region: "УФО", city: "Екатеринбург", address: "623700, Свердловская область, г.  Березовский, ул. Кольцевая, стр. 4", service: "sohy", servicePwd: "sohy77", sales: "xxrf", salesPwd: "xxrf22" },
+        { code: "EURUS06274", title: "Чанган Центр Измайлово", region: "ЦФО", city: "Москва", address: "143912,  МО, г. Балашиха, Западная коммунальная зона, шоссе Энтузиастов, д. 11 А", service: "sdtw", servicePwd: "sdtw05", sales: "tskf", salesPwd: "tskf39" },
+        { code: "EURUS06295", title: "Чанган Центр FAVORIT MOTORS МКАД", region: "ЦФО", city: "Реутов", address: "143968, Московская обл., г. Реутов, МКАД 2 км., дом 7", service: "vbwe", servicePwd: "vbwe54", sales: "iehu", salesPwd: "iehu09" },
+        { code: "EURUS06294", title: "Чанган Центр VERRA", region: "ПФО", city: "Пермь", address: "614513, Пермский край, м.р-н Пермский, с.п. Савинское, тер. Шоссе Космонавтов, д. 427", service: "xpgt", servicePwd: "xpgt84", sales: "kbeh", salesPwd: "kbeh73" },
+        { code: "EURUS06235", title: "Чанган Центр Пятигорск", region: "СКФО", city: "Пятигорск", address: "357500, Ставропольский край, г. Пятигорск, ул. Ермолова, 50", service: "dspw", servicePwd: "dspw95", sales: "dspw", salesPwd: "dspw43" },
+        { code: "EURUS06314", title: "Чанган Центр Новый Уренгой", region: "УФО", city: "Новый Уренгой", address: "614513, Ямало-Ненецкий АО, г. Новый Уренгой, ул. Магистральная, дом 50а", service: "geni", servicePwd: "geni32", sales: "xigt", salesPwd: "xigt27" },
+        { code: "EURUS06226", title: "Чанган Центр Липецк", region: "ЦФО", city: "Липецк", address: "398024, г. Липецк, ул. Юных Натуралистов, д. 18, стр.Б", service: "edki", servicePwd: "edki44", sales: "xohe", salesPwd: "xohe66" },
+        { code: "EURUS06334", title: "Чанган Центр Лаки Моторс", region: "УФО", city: "Екатеринбург", address: "620103, г. Екатеринбург, ул. Селькоровская, дом 22", service: "don’t", servicePwd: "dont87", sales: "rjwk", salesPwd: "rjwk19" },
+        { code: "EURUS06192", title: "Чанган Центр Тамбов", region: "ЦФО", city: "Тамбов", address: "392000, г. Тамбов. Киквидзе улица, дом 85Г", service: "kdgy", servicePwd: "kdgy22", sales: "fdal", salesPwd: "fdal33" },
+        { code: "EURUS06035", title: "Чанган Центр Радар Авто", region: "ЦФО", city: "Иваново", address: "153007, г. Иваново, ул. Фрунзе, д. 92", service: "xort", servicePwd: "xort64", sales: "innn", salesPwd: "innn40" },
+        { code: "EURUS06310", title: "Чанган Центр Базис Окружная", region: "УФО", city: "Тюмень", address: "625025, Тюменская обл., г. Тюмень, Окружная дорога, дом 202", service: "wlnu", servicePwd: "wlnu88", sales: "aspo", salesPwd: "aspo29" },
+        { code: "EURUS06346", title: "Юни Центр Вологда", region: "СЗФО", city: "Вологда", address: "160024, Вологодская обл., г. Вологда, ул. Северная, дом 25А", service: "yerc", servicePwd: "yerc08", sales: "ngrh", salesPwd: "ngrh43" },
+        { code: "EURUS06262", title: "Чанган Центр FAVORIT MOTORS Юг", region: "ЦФО", city: "Москва", address: "117545, г. Москва, 1-ый Дорожный проезд, д. 4, корп. 1", service: "igfy", servicePwd: "igfy41", sales: "hdgh", salesPwd: "hdgh72" },
+        { code: "EURUS06233", title: "Чанган Центр Башавтоком", region: "ПФО", city: "Уфа", address: "450071, г. Уфа, Пр. С. Юлаева, 89", service: "jnye", servicePwd: "jnye55", sales: "wohg", salesPwd: "wohg11" },
+        { code: "EURUS06234", title: "Чанган Центр Башавтоком Юг", region: "ПФО", city: "Стерлитамак", address: "453102, г. Стерлитамак, ул. Космонавтов, 1", service: "nhdu", servicePwd: "nhdu48", sales: "hdli", salesPwd: "hdli08" },
+        { code: "EURUS06234", title: "Юни Центр Башавтоком Юг", region: "ПФО", city: "Стерлитамак", address: "453103, г. Стерлитамак, ул. Элеваторная, дом 86, корпус А", service: "htdf", servicePwd: "htdf94", sales: "jdey", salesPwd: "jdey77" },
+        { code: "EURUS06302", title: "Чанган Центр Башавтоком Север", region: "ПФО", city: "Октябрьский", address: "452606, г. Октябрьский, ул. Северная, 19/27", service: "xkut", servicePwd: "xkut59", sales: "jheu", salesPwd: "jheu73" },
+        { code: "EURUS06327", title: "Чанган Центр КАН АВТО Сибирский", region: "ПФО", city: "Казань", address: "420053, Респ. Татарстан, г. Казань, ул. Сибирский Тракт, дом 51", service: "dbhq", servicePwd: "dbhq50", sales: "bhdh", salesPwd: "bhdh82" },
+        { code: "EURUS06212", title: "Чанган Центр Внуково", region: "ЦФО", city: "Москва", address: "108811, г. Москва, Московский поселение, вн.тер.г., д. Картмазово, ул. Киевская, дом 1, пом.62", service: "djip", servicePwd: "djip83", sales: "hehe", salesPwd: "hehe23" },
+        { code: "EURUS06335", title: "Юни Центр Лаки Моторс", region: "УФО", city: "Екатеринбург", address: "620076, Свердловская обл., г. Екатеринбург, ул. Щербакова, дом 142А", service: "vdht", servicePwd: "vdht66", sales: "hfsc", salesPwd: "hfsc78" },
+        { code: "EURUS06321", title: "Чанган Центр Россо", region: "СФО", city: "Иркутск", address: "664050, Иркутская обл., г. Иркутск, ул. Дыбовского, дом 17", service: "hrse", servicePwd: "hrse11", sales: "krfsg", salesPwd: "krfsg04" },
+        { code: "EURUS06247", title: "Чанган Центр FAVORIT MOTORS Север", region: "ЦФО", city: "Москва", address: "125239, г. Москва, ул. Коптевская, дом 69А, строение 5", service: "rgws", servicePwd: "rgws49", sales: "fjye", salesPwd: "fjye32" },
+        { code: "EURUS06017", title: "Чанган Центр Восток-Авто", region: "ПФО", city: "Оренбург", address: "460021, Оренбургская обл., г. Оренбург, ул. Туркестанская, дом 161А", service: "kdye", servicePwd: "kdye31", sales: "jesr", salesPwd: "jesr30" },
+        { code: "EURUS06207", title: "Чанган Центр Премьер Авто", region: "ЦФО", city: "Смоленск", address: "214011, Смоленская обл.,  г. Смоленск,  ул. Кутузова, дом 15, корпус Б", service: "jsst", servicePwd: "jsst96", sales: "hrws", salesPwd: "hrws04" },
+        { code: "EURUS06353", title: "Чанган Центр Медведь Север", region: "СФО", city: "Красноярск", address: "660118, Красноярский край, г. Красноярск, Северное шоссе, дом 19\"д\"", service: "jwry", servicePwd: "jwry83", sales: "jtsr", salesPwd: "jtsr63" },
+        { code: "EURUS06348", title: "Юни Центр Пенза", region: "ПФО", city: "Пенза", address: "440066, Пензенская обл., г. Пенза, Победы пр-кт, дом 121/1", service: "kfds", servicePwd: "kfds77", sales: "fsfu", salesPwd: "fsfu91" },
+        { code: "EURUS06175", title: "Чанган Центр СК-Моторс", region: "УФО", city: "Сургут", address: "628415, г. Сургут, пр-кт Ленина, дом 76/1", service: "gsew", servicePwd: "gsew72", sales: "gese", salesPwd: "gese26" },
+        { code: "EURUS06315", title: "Чанган Центр АвтоПремьер Зубово", region: "ПФО", city: "Уфа", address: "450522, Респ. Башкортостан, м. р-н Уфимский, С.П. Зубовский сельсовет, с. Зубово, ул. Электрозаводская, здание 18", service: "jumi", servicePwd: "jumi83", sales: "jehy", salesPwd: "jehy02" },
+        { code: "EURUS06266", title: "Чанган Центр Архангельск", region: "СЗФО", city: "Архангельск", address: "163062, г. Архангельск, ул. Папанина, дом 23", service: "jdie", servicePwd: "jdie88", sales: "heeo", salesPwd: "heeo60" },
+        { code: "EURUS06291", title: "Чанган Центр Сыктывкар", region: "СЗФО", city: "Сыктывкар", address: "167000, Республика Коми, г.Сыктывкар, ул. Гаражная, д. 19", service: "kejo", servicePwd: "kejo02", sales: "jeie", salesPwd: "jeie52" },
+        { code: "EURUS06333", title: "Чанган Центр Улан-Удэ", region: "ДФО", city: "Улан-Удэ", address: "670045, г. Улан-Удэ, ул. Шаляпина, дом 39", service: "pejk", servicePwd: "pejk42", sales: "erfe", salesPwd: "erfe04" },
+        { code: "EURUS06290", title: "Чанган Центр Кострома", region: "ЦФО", city: "Кострома", address: "156014, Костромская обл., г. Кострома, ул. Сутырина, дом 2А", service: "kgrs", servicePwd: "kgrs89", sales: "pkrj", salesPwd: "pkrj07" },
+        { code: "EURUS06219", title: "Чанган Центр Авторусь Подольск", region: "ЦФО", city: "Москва", address: "142111, Московская область, г. Подольск, пр-т Юных Ленинцев, д. 1И, помещение 2.1", service: "khuc", servicePwd: "khuc15", sales: "khey", salesPwd: "khey17" },
+        { code: "EURUS06165", title: "Чанган Центр Новокузнецк", region: "СФО", city: "Новокузнецк", address: "654006, Кемеровская область - Кузбасс обл., г. Новокузнецк, ул. Орджоникидзе, дом 24", service: "endu", servicePwd: "endu10", sales: "lhey", salesPwd: "lhey48" },
+        { code: "EURUS06322", title: "Чанган Центр Иркут на Трактовой", region: "СФО", city: "Иркутск", address: "664014, г. Иркутск, ул. Трактовая, дом 21", service: "hehb", servicePwd: "hehb88", sales: "tdbj", salesPwd: "tdbj26" },
+        { code: "EURUS06171", title: "Чанган Центр Йошкар-Ола", region: "ПФО", city: "Йошкар-Ола", address: "424913, г. Йошкар-Ола, Кокшайский проезд, 49 а", service: "jeon", servicePwd: "jeon38", sales: "hfew", salesPwd: "hfew25" },
+        { code: "EURUS06320", title: "Чанган Центр Атик-Моторс", region: "ДФО", city: "Благовещенск", address: "675028, Амурская обл., г. Благовещенск, Новотроицкое шоссе, дом 12/1", service: "jdin", servicePwd: "jdin72", sales: "heln", salesPwd: "heln49" },
+        { code: "EURUS06343", title: "Чанган Центр Альянс Моторс", region: "УФО", city: "Сургут", address: "628415, Ханты-Мансийский Автономный округ - Югра АО, г. Сургут, Профсоюзов ул., дом 65", service: "jeje", servicePwd: "jeje83", sales: "gein", salesPwd: "gein02" },
+        { code: "EURUS06257", title: "Юни Центр Курган", region: "УФО", city: "Курган", address: "640027, г. Курган, ул. Б.Петрова, 102", service: "fojd", servicePwd: "fojd27", sales: "hekf", salesPwd: "hekf82" },
+        { code: "EURUS06230", title: "Юни Центр Зеленоград", region: "ЦФО", city: "Москва", address: "141552, Московская обл., Солнечногорский р-н, Ржавки р.п., м-н 2, строение 13/2", service: "jdke", servicePwd: "jdke29", sales: "neuo", salesPwd: "neuo44" },
+        { code: "EURUS06271", title: "Чанган Центр Атлант-М", region: "ЦФО", city: "Москва", address: "129128, г. Москва, ул. Бажова, д. 17, стр.1", service: "oidj", servicePwd: "oidj13", sales: "ljgf", salesPwd: "ljgf74" },
+        { code: "EURUS06331", title: "Чанган Центр Варшавка", region: "ЦФО", city: "Москва", address: "117405, Московская обл., Ленинский г.о., п. Битца, МКАД 32 км, строение 3", service: "hbdu", servicePwd: "hbdu02", sales: "ehdh", salesPwd: "ehdh73" },
+        { code: "EURUS06180", title: "Чанган Центр КМ/Ч-Север", region: "ЦФО", city: "Москва", address: "125599, г. Москва, 78-км. МКАД, дом 2, корпус 4", service: "hebi", servicePwd: "hebi92", sales: "hedj", salesPwd: "hedj63" },
+        { code: "EURUS06259", title: "Чанган Центр Ноябрьск", region: "УФО", city: "Ноябрьск", address: "629800  г. Ноябрьск,  ул. Магистральная, 87а", service: "jenr", servicePwd: "jenr74", sales: "inee", salesPwd: "inee72" },
+        { code: "EURUS06205", title: "Чанган Центр Череповец", region: "СЗФО", city: "Череповец", address: "162677,  Вологодская область, Череповецкий р-н, д. Солманское, ул.Центральная 11Б", service: "оеау", servicePwd: "оеау01", sales: "orju", salesPwd: "orju93" },
+        { code: "EURUS06241", title: "Чанган Центр Пенза", region: "ПФО", city: "Пенза", address: "440028, г. Пенза, ул. Беляева 2В", service: "hdif", servicePwd: "hdif83", sales: "onye", salesPwd: "onye68" },
+        { code: "EURUS06296", title: "Юни Центр Псков", region: "СЗФО", city: "Псков", address: "180006, г. Псков, улица Леона Поземского, дом 114", service: "heee", servicePwd: "heee93", sales: "kibe", salesPwd: "kibe72" },
+        { code: "EURUS06339", title: "Юни Центр Глазурит", region: "УФО", city: "Екатеринбург", address: "620091, Свердловская обл., г. Екатеринбург, ул. Фронтовых бригад, дом 27, оф.7", service: "ybod", servicePwd: "ybod95", sales: "ieyf", salesPwd: "ieyf47" },
+        { code: "EURUS06336", title: "Чанган Центр АСМОТО", region: "УФО", city: "Екатеринбург", address: "620000, Свердловская обл., г. Верхняя Пышма, ул. Петрова, дом 44а", service: "feel", servicePwd: "efel63", sales: "jkdg", salesPwd: "jkdg07" },
+        { code: "EURUS06319", title: "Чанган Центр Сумотори-Авто", region: "ДФО", city: "Артем", address: "692770, Приморский край, г. Артем, ул. Тульская, дом 2", service: "jdhh", servicePwd: "jdhh34", sales: "rsvj", salesPwd: "rsvj99" },
+        { code: "EURUS06317", title: "Юни Центр Автоплюс", region: "УФО", city: "Нижний Тагил", address: "622049, Свердловская обл., г. Нижний Тагил, Черноисточинское шоссе, дом 68, строение 1", service: "bdnf", servicePwd: "bdnf44", sales: "kdhb", salesPwd: "kdhb56" },
+        { code: "EURUS06352", title: "Чанган Центр Алтуфьево", region: "ЦФО", city: "Москва", address: "141031, Московская обл., г. Мытищи, Поселок Нагорное, километр МКАД 85-й (ТПЗ Алтуфьево тер.), владение 5, строение 1", service: "hrew", servicePwd: "hrew82", sales: "jenu", salesPwd: "jenu65" },
+        { code: "EURUS06260", title: "Чанган Центр Нягань", region: "УФО", city: "Нягань", address: "628183, Ханты-Мансийский автономный округ-Югра, г. Нягань, пр-кт Нефтяников, д. 1, корп. 2", service: "jseg", servicePwd: "jseg04", sales: "dnj", salesPwd: "dnj69" },
+        { code: "EURUS06367", title: "Чанган Центр Авто Премиум", region: "СЗФО", city: "Санкт-Петербург", address: "195426, г. Санкт-Петербург, ул. Хасанская, дом 5, корпус 2", service: "kdcb", servicePwd: "kdcb55", sales: "idnc", salesPwd: "idnc03" },
+        { code: "EURUS06371", title: "Чанган Центр на Копылова", region: "СФО", city: "Красноярск", address: "660100, Красноярский край, г. Красноярск, ул. Копылова, здание 57", service: "fjif", servicePwd: "fjif13", sales: "gduh", salesPwd: "gduh60" },
+        { code: "EURUS06379", title: "Чанган Центр Феникс-Авто", region: "СФО", city: "Омск", address: "644015, Омская обл., г. Омск, Суворова ул., дом 93", service: "infh", servicePwd: "infh68", sales: "infh", salesPwd: "infh67" },
+        { code: "EURUS06380", title: "Чанган Центр БАКРА 2.0", region: "ЮФО", city: "Краснодар", address: "350058, Краснодарский край, г. Краснодар, ул. Селезнева, дом 204В", service: "fnhl", servicePwd: "fnhl97", sales: "bgdy", salesPwd: "bgdy22" },
+        { code: "EURUS06382", title: "Чанган Центр Фастар на Станционной", region: "СФО", city: "Новосибирск", address: "630096, Новосибирская обл., г. Новосибирск, Станционная ул., дом 88", service: "jdve", servicePwd: "jdve00", sales: "okdk", salesPwd: "okdk50" },
+        { code: "EURUS06383", title: "Чанган Центр Автопрестиж", region: "ЮФО", city: "Ставрополь", address: "355035, Ставропольский край, г. Ставрополь, Кулакова пр-кт, дом 16А", service: "kfnr", servicePwd: "kfnr46", sales: "kege", salesPwd: "kege34" },
+        { code: "EURUS06394", title: "Чанган Центр К-Моторс", region: "СЗФО", city: "Петрозаводск", address: "185014, г. Петрозаводск, Лесной проспект, д. 55, стр. 1.", service: "jdue", servicePwd: "jdue99", sales: "imyd", salesPwd: "imyd60" },
+        { code: "EURUS06405", title: "Чанган Центр Альянс", region: "СФО", city: "Омск", address: "644106, Омская обл., г. Омск, ул. Волгоградская, дом 38, корпус 2", service: "dohy", servicePwd: "dohy32", sales: "hduw", salesPwd: "hduw15" },
+        { code: "EURUS06406", title: "Чанган Центр Автопрестиж", region: "ПФО", city: "Самара", address: "443028, г. Самара, Московское шоссе, 24-й километр, 42с1", service: "jdhr", servicePwd: "jdhr88", sales: "deju", salesPwd: "deju73" }
+    ];
 
-    // DOM элементы
-    const inputElement = document.getElementById('dcCodeInput');
-    const showBtn = document.getElementById('showAccessBtn');
-    const placeholderDiv = document.getElementById('placeholderMsg');
-    const cardContainer = document.getElementById('credentialCard');
-
-    // Функция копирования
+    // ----- ФУНКЦИЯ КОПИРОВАНИЯ -----
     function copyToClipboard(text, btnElement) {
+        if (!text) return;
         navigator.clipboard.writeText(text).then(() => {
-            const originalText = btnElement.innerText;
-            btnElement.innerText = '✅ Скопировано!';
-            setTimeout(() => { btnElement.innerText = originalText; }, 1500);
+            const originalText = btnElement.textContent;
+            btnElement.textContent = '✅ Готово!';
+            setTimeout(() => {
+                btnElement.textContent = originalText;
+            }, 1500);
         }).catch(() => {
             alert('Не удалось скопировать');
         });
     }
 
-    // Рендер карточки доступа
-    function renderAccessCard(code, data) {
-        if (!data) return null;
-        return `
+    // ----- ОСНОВНАЯ ФУНКЦИЯ ПОИСКА -----
+    function searchAccess() {
+        const input = document.getElementById('dcCodeInput');
+        const rawValue = input.value.trim();
+        const placeholderMsg = document.getElementById('placeholderMsg');
+        const credentialCard = document.getElementById('credentialCard');
+
+        // Проверяем формат
+        const parts = rawValue.split('|').map(s => s.trim());
+        if (parts.length !== 2 || !parts[0] || !parts[1]) {
+            placeholderMsg.style.display = 'block';
+            credentialCard.style.display = 'none';
+            placeholderMsg.innerHTML = '❌ Ошибка: используйте формат <strong>КОД | ГОРОД</strong><br><small>Пример: EURUS06200 | Воронеж</small>';
+            return;
+        }
+
+        const searchCode = parts[0].toUpperCase();
+        const searchCity = parts[1];
+
+        // Ищем все записи с таким кодом
+        const results = data.filter(item => 
+            item.code.toUpperCase() === searchCode
+        );
+
+        if (results.length === 0) {
+            placeholderMsg.style.display = 'block';
+            credentialCard.style.display = 'none';
+            placeholderMsg.innerHTML = `❌ Код <strong>${searchCode}</strong> не найден в базе.<br><small>Проверьте правильность ввода</small>`;
+            return;
+        }
+
+        // Проверяем город — должен совпадать хотя бы у одной записи
+        const cityMatch = results.some(item => 
+            item.city.toLowerCase() === searchCity.toLowerCase()
+        );
+
+        if (!cityMatch) {
+            placeholderMsg.style.display = 'block';
+            credentialCard.style.display = 'none';
+            placeholderMsg.innerHTML = `❌ Город <strong>${searchCity}</strong> не найден для кода ${searchCode}.
+            return;
+        }
+
+        // Фильтруем только те записи, где город совпадает
+        const filteredResults = results.filter(item => 
+            item.city.toLowerCase() === searchCity.toLowerCase()
+        );
+
+        // Скрываем плейсхолдер
+        placeholderMsg.style.display = 'none';
+        credentialCard.style.display = 'block';
+
+        // Строим HTML
+        let html = '';
+
+        // Общая информация (берем из первой записи)
+        const first = filteredResults[0];
+        const isMulti = filteredResults.length > 1;
+
+        html += `
             <div class="access-card">
                 <div class="dc-header">
-                    <span class="dc-code">${code}</span>
-                    <div class="dc-title">${data.name}</div>
-                    <div style="font-size:0.8rem; color:#5f8d80; margin-top: 6px;">${data.holding ? data.holding + ' · ' : ''}${data.region} · ${data.city}</div>
+                    <div class="dc-code">${first.code}</div>
+                    <div class="dc-title">${isMulti ? 'Доступы CS + UNI' : first.title}</div>
                 </div>
                 <div class="info-grid">
+                    <div class="detail-row">
+                        <span class="detail-item"><strong>Округ:</strong> ${first.region}</span>
+                        <span class="detail-item"><strong>Город:</strong> ${first.city}</span>
+                        <span class="detail-item" style="flex:1; min-width:180px;"><strong>Адрес:</strong> ${first.address}</span>
+                    </div>
+        `;
+
+        // Если несколько записей — показываем все доступы
+        if (isMulti) {
+            html += `<div style="display:flex; flex-direction:column; gap:16px;">`;
+            filteredResults.forEach((item, index) => {
+                const label = item.title.includes('Юни') ? 'Юни Центр' : 'Чанган Центр';
+                html += `
+                    <div class="access-entry">
+                        <div style="font-weight:600; color:#1a5c4e; margin-bottom:10px; font-size:0.95rem;">${label} (${item.title.replace(/^(Чанган|Юни) Центр /, '')})</div>
+                        <div class="dual-access">
+                            <div class="credential-block">
+                                <div class="cred-label">🔧 Сервисный доступ</div>
+                                <div class="cred-value">
+                                    <span>${item.service}</span>
+                                    <button class="copy-btn" data-copy="${item.service}">Копировать</button>
+                                </div>
+                                <div style="margin-top: 6px; font-size: 0.9rem; font-family: monospace; color: #295f52;">
+                                    Пароль: ${item.servicePwd}
+                                    <button class="copy-btn" style="margin-left: 10px;" data-copy="${item.servicePwd}">Копировать</button>
+                                </div>
+                            </div>
+                            <div class="credential-block">
+                                <div class="cred-label">📈 Доступ для продаж</div>
+                                <div class="cred-value">
+                                    <span>${item.sales}</span>
+                                    <button class="copy-btn" data-copy="${item.sales}">Копировать</button>
+                                </div>
+                                <div style="margin-top: 6px; font-size: 0.9rem; font-family: monospace; color: #295f52;">
+                                    Пароль: ${item.salesPwd}
+                                    <button class="copy-btn" style="margin-left: 10px;" data-copy="${item.salesPwd}">Копировать</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        } else {
+            // Одна запись — показываем как обычно
+            const item = filteredResults[0];
+            html += `
+                <div class="dual-access">
                     <div class="credential-block">
-                        <div class="cred-label">🔐 ЛОГИН ДЛЯ ПОРТАЛА ТАЙНЫЙ ПОКУПАТЕЛЬ</div>
+                        <div class="cred-label">🔧 Сервисный доступ</div>
                         <div class="cred-value">
-                            <span>${data.login}</span>
-                            <button class="copy-btn" data-copy="${data.login}">📋 Копировать логин</button>
+                            <span>${item.service}</span>
+                            <button class="copy-btn" data-copy="${item.service}">Копировать</button>
+                        </div>
+                        <div style="margin-top: 6px; font-size: 0.9rem; font-family: monospace; color: #295f52;">
+                            Пароль: ${item.servicePwd}
+                            <button class="copy-btn" style="margin-left: 10px;" data-copy="${item.servicePwd}">Копировать</button>
                         </div>
                     </div>
                     <div class="credential-block">
-                        <div class="cred-label">🗝️ ПАРОЛЬ (СЕРВИСНЫЙ ДОСТУП)</div>
+                        <div class="cred-label">📈 Доступ для продаж</div>
                         <div class="cred-value">
-                            <span>${data.password}</span>
-                            <button class="copy-btn" data-copy="${data.password}">📋 Копировать пароль</button>
+                            <span>${item.sales}</span>
+                            <button class="copy-btn" data-copy="${item.sales}">Копировать</button>
+                        </div>
+                        <div style="margin-top: 6px; font-size: 0.9rem; font-family: monospace; color: #295f52;">
+                            Пароль: ${item.salesPwd}
+                            <button class="copy-btn" style="margin-left: 10px;" data-copy="${item.salesPwd}">Копировать</button>
                         </div>
                     </div>
-                    <div style="background:#eef6f2; border-radius: 18px; padding: 10px 16px; font-size:0.8rem; color: #2c6b5c;">
-                        🎯 Данные для входа на платформу «Тайный покупатель» (оценка качества сервиса)
-                    </div>
+                </div>
+            `;
+        }
+
+        html += `
                 </div>
             </div>
         `;
-    }
 
-    // Показать доступ по введённым коду и городу
-    function showAccess() {
-        const inputValue = inputElement.value.trim();
-        
-        if (!inputValue) {
-            cardContainer.style.display = 'none';
-            placeholderDiv.style.display = 'flex';
-            placeholderDiv.innerHTML = '⚠️ Введите код ДЦ и город в формате «КОД | ГОРОД»';
-            return;
-        }
-        
-        // Разбираем строку: ожидаем формат "КОД | ГОРОД"
-        const separatorIndex = inputValue.indexOf('|');
-        if (separatorIndex === -1) {
-            cardContainer.style.display = 'none';
-            placeholderDiv.style.display = 'flex';
-            placeholderDiv.innerHTML = '❌ Неверный формат. Используйте разделитель | <br> Например: EURUS06200 | Воронеж';
-            return;
-        }
-        
-        const code = inputValue.substring(0, separatorIndex).trim();
-        const city = inputValue.substring(separatorIndex + 1).trim();
-        
-        if (!code || !city) {
-            cardContainer.style.display = 'none';
-            placeholderDiv.style.display = 'flex';
-            placeholderDiv.innerHTML = '❌ И код, и город должны быть заполнены. Пример: EURUS06200 | Воронеж';
-            return;
-        }
-        
-        // Проверяем существование кода
-        if (!dcAccessData[code]) {
-            cardContainer.style.display = 'none';
-            placeholderDiv.style.display = 'flex';
-            placeholderDiv.innerHTML = `❌ Код "${code}" не найден в справочнике.<br>Проверьте правильность кода.`;
-            return;
-        }
-        
-        const data = dcAccessData[code];
-        
-        // Сравниваем город (без учёта регистра, пробелов в начале/конце)
-        const normalizedInputCity = city.toLowerCase().trim();
-        const normalizedDataCity = data.city.toLowerCase().trim();
-        
-        if (normalizedInputCity !== normalizedDataCity) {
-            cardContainer.style.display = 'none';
-            placeholderDiv.style.display = 'flex';
-            placeholderDiv.innerHTML = `❌ Город "${city}" не соответствует центру с кодом ${code}.<br>Пожалуйста, введите данные правильно.`;
-            return;
-        }
-        
-        // Всё верно — показываем доступ
-        const cardHtml = renderAccessCard(code, data);
-        cardContainer.innerHTML = cardHtml;
-        cardContainer.style.display = 'block';
-        placeholderDiv.style.display = 'none';
-        
-        // Привязываем обработчики копирования
-        document.querySelectorAll('.copy-btn').forEach(btn => {
-            const copyValue = btn.getAttribute('data-copy');
-            if (copyValue) {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    copyToClipboard(copyValue, btn);
-                });
-            }
+        credentialCard.innerHTML = html;
+
+        // Навешиваем обработчики на кнопки копирования
+        document.querySelectorAll('.copy-btn[data-copy]').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const text = this.getAttribute('data-copy');
+                if (text) {
+                    copyToClipboard(text, this);
+                }
+            });
         });
     }
 
-    // Обработчик кнопки
-    showBtn.addEventListener('click', showAccess);
-    
-    // Нажатие Enter в поле ввода
-    inputElement.addEventListener('keypress', (e) => {
+    // ----- СОБЫТИЯ -----
+    const searchBtn = document.getElementById('showAccessBtn');
+    const inputField = document.getElementById('dcCodeInput');
+
+    searchBtn.addEventListener('click', searchAccess);
+
+    inputField.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
-            showAccess();
+            searchAccess();
         }
     });
+
+    // При загрузке показываем пример
+    window.addEventListener('DOMContentLoaded', function() {
+        inputField.value = 'EURUS06214 | Санкт-Петербург';
+        setTimeout(searchAccess, 300);
+    });
 </script>
+
 </body>
 </html>
