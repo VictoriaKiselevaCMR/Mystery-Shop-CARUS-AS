@@ -1,3 +1,4 @@
+
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -363,8 +364,8 @@
                 <button id="showAccessBtn" class="show-btn">🔓 Показать доступ</button>
             </div>
             <div class="example-block">
-                <strong>📌 Примеры правильного ввода:</strong><br>
-                • <code>EURUS06200 | Воронеж</code><br>
+                <strong>📌 Пример правильного ввода:</strong><br>
+                • <code>EURUS06200 | Воронеж</code>
             </div>
             <div class="hint-text">
                 💡 Формат: <strong>КОД_ДЦ | ГОРОД</strong> (вертикальная черта с пробелами). Город указывайте точно как указано на портале DNM.
@@ -654,7 +655,7 @@
         if (!cityMatch) {
             placeholderMsg.style.display = 'block';
             credentialCard.style.display = 'none';
-            placeholderMsg.innerHTML = `❌ Город <strong>${searchCity}</strong> не найден для кода ${searchCode}.<br>
+            placeholderMsg.innerHTML = `❌ Город <strong>${searchCity}</strong> не найден для кода ${searchCode}.<br><small>Проверьте правильность написания города</small>`;
             return;
         }
 
@@ -788,7 +789,7 @@
 
     // При загрузке показываем пример
     window.addEventListener('DOMContentLoaded', function() {
-        inputField.value = 'EURUS06214 | Санкт-Петербург';
+        inputField.value = 'EURUS06200 | Воронеж';
         setTimeout(searchAccess, 300);
     });
 </script>
