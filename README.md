@@ -604,7 +604,10 @@
         { code: "EURUS06408", title: "Чанган Центр Арконт на Неждановой", region: "ЮФО", city: "Волгоград", address: "400120, Волгоградская обл., г. Волгоград, ул. им. Неждановой, дом 12", service: "iuyt", servicePwd: "iuyt456", sales: "sdew", salesPwd: "sdew23" },    
         { code: "EURUS06409", title: "Чанган Центр Шувалово Выборгский", region: "СЗФО", city: "Санкт-Петербург", address: "194355, г. Санкт-Петербург, Выборгское ш., дом 31А, литера А", service: "sxed", servicePwd: "sxed678", sales: "hgty", salesPwd: "hgty65" },
         { code: "EURUS06410", title: "Чанган Центр Нижегородец", region: "ПФО", city: "Нижний Новгород", address: "603028, Нижегородская обл, Нижний Новгород г, Московское ш, дом № 34", service: "yewq", servicePwd: "yewq65", sales: "fgtr", salesPwd: "fgtrwq" },
-    { code: "EURUS06411", title: "Чанган Центр Эксперт - Авто", region: "СФО", city: "Новосибирск", address: "630027, Новосибирская обл, Новосибирск г, Богдана Хмельницкого ул, дом № 75/1", service: "jhol", servicePwd: "dfer", sales: "hyrf", salesPwd: "hyrf43" } 
+        { code: "EURUS06411", title: "Чанган Центр Эксперт - Авто", region: "СФО", city: "Новосибирск", address: "630027, Новосибирская обл, Новосибирск г, Богдана Хмельницкого ул, дом № 75/1", service: "jhol", servicePwd: "dfer", sales: "hyrf", salesPwd: "hyrf43" },
+        { code: "EURUS06412", title: "Чанган Центр Рольф Серпухов", region: "ЦФО", city: "Серпухов", address: "142207, Московская обл., г. Серпухов, Борисово д., дом 111", service: "rwdse", servicePwd: "rwdse657", sales: "hyrf44", salesPwd: "hyrf441" }, 
+        { code: "EURUS06414", title: "Чанган Центр Автомаг", region: "УФО", city: "Нижневартовск", address: "628615, Ханты-Мансийский Автономный округ - Югра АО, Нижневартовск г, Интернациональная ул, здание № 10/П", service: "hfyew", servicePwd: "hfyew12", sales: "lokpr", salesPwd: "lokpr847" },
+        { code: "EURUS06415", title: "Чанган Центр ИЮЛЬ", region: "УФО", city: "Екатеринбург", address: "620102, Свердловская область, г. Екатеринбург, ул. Гурзуфская, 63", service: "llldr", servicePwd: "llldr3867", sales: "seiwu", salesPwd: "seiwu944" }
     ];
 
     // ----- ФУНКЦИЯ КОПИРОВАНИЯ -----
